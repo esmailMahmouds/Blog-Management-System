@@ -3,3 +3,6 @@
 ################################################################################
 
 /BlogManagement/.vs/BlogManagement
+*.wsuo
+*.json
+/BlogManagement/BlogApp/BlogApp.csproj.user
