@@ -1,4 +1,10 @@
 using BlogApp.Context;
+using BlogApp.Repositories.Implementation;
+using BlogApp.Repositories.Interfaces;
+using BlogApp.Services.Implementation;
+using BlogApp.Services.Interfaces;
+using BlogApp.UnitOfWork.Implementation;
+using BlogApp.UnitOfWork.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +15,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+//register services and repositories
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Add API Explorer services for Swagger
 builder.Services.AddEndpointsApiExplorer();
