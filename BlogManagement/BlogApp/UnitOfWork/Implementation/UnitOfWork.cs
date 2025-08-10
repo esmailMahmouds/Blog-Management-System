@@ -10,13 +10,21 @@ namespace BlogApp.UnitOfWork.Implementation
 
         private readonly ApplicationDbContext _context;
 
+        private IPostRepository _postRepository;
 
         private IUserRepository _userRepository;
-
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public IPostRepository PostRepository
+        {
+            get
+            {
+                return _postRepository ??= new PostRepository(_context);
+            }
         }
 
         public IUserRepository UserRepository
