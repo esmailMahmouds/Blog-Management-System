@@ -1,5 +1,11 @@
 using BlogApp.Context;
 using Microsoft.EntityFrameworkCore;
+using BlogApp.Repositories.Implementation;
+using BlogApp.Repositories.Interfaces;
+using BlogApp.Services.Implementation;
+using BlogApp.Services.Interfaces;
+using BlogApp.UnitOfWork.Implementation;
+using BlogApp.UnitOfWork.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +15,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(
 	options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 var app = builder.Build();
 

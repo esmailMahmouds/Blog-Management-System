@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "~/Views/Shared/_HomePage.cshtml";
+}
+
+hello from posts display page
+
+@model IEnumerable<BlogApp.Models.Post>
+
+<h2>All Posts</h2>
+@foreach (var post in Model)
+{
+    <div>
+        <h3>@post.Title</h3> 
+        <p>@post.Content</p>
+        <small>Likes: @post.LikeCount | Rating: @post.AverageRate</small>
+    </div>
+}
