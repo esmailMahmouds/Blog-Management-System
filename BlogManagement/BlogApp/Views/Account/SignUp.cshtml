@@ -49,14 +49,7 @@
 
                     <div class="mb-3">
                         <label asp-for="CountryId" class="form-label">Country</label>
-                        <select asp-for="CountryId" class="form-select">
-                            <option value="">Select your country</option>
-                            <option value="1">United States</option>
-                            <option value="2">Canada</option>
-                            <option value="3">United Kingdom</option>
-                            <option value="4">Australia</option>
-                            <option value="5">Other</option>
-                        </select>
+                        <select asp-for="CountryId" class="form-select" asp-items="ViewBag.Countries"></select>
                         <span asp-validation-for="CountryId" class="text-danger"></span>
                     </div>
 

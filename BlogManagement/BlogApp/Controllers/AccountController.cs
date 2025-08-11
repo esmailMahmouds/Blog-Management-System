@@ -1,6 +1,8 @@
+using BlogApp.Context;
 using BlogApp.Models.Dtos;
 using BlogApp.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BlogApp.Controllers
 {
@@ -8,16 +10,19 @@ namespace BlogApp.Controllers
     {
         private readonly IAuthService _authService;
         private readonly ILogger<AccountController> _logger;
+        private readonly ApplicationDbContext _context; //change when countries logic is implemented
 
-        public AccountController(IAuthService authService, ILogger<AccountController> logger)
+        public AccountController(IAuthService authService, ILogger<AccountController> logger, ApplicationDbContext context)
         {
             _authService = authService;
             _logger = logger;
+            _context = context; //change when countries logic is implemented
         }
 
         [HttpGet]
         public IActionResult SignUp()
         {
+            LoadCountries();
             return View();
         }
 
@@ -26,6 +31,7 @@ namespace BlogApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                LoadCountries();
                 return View(model);
             }
 
@@ -37,6 +43,7 @@ namespace BlogApp.Controllers
                 return RedirectToAction("SignIn");
             }
 
+            LoadCountries();
             ModelState.AddModelError("", result.Error ?? "Registration failed");
             return View(model);
         }
@@ -66,6 +73,12 @@ namespace BlogApp.Controllers
 
             ModelState.AddModelError("", result.Error ?? "Sign in failed");
             return View(model);
+        }
+
+        private void LoadCountries()
+        {
+            var countries = _context.Countries.ToList();
+            ViewBag.countries = new SelectList(countries, "Id", "Name");
         }
     }
 }
