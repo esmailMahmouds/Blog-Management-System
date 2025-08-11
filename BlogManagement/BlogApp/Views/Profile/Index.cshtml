@@ -1,0 +1,20 @@
+﻿@model User
+
+@{
+	ViewData["Title"] = $"{Model.Name}";
+}
+
+<div class="container-fluid d-flex justify-content-center">
+	<partial name="_UserInfo.cshtml" model="Model"/>
+</div>
+
+<script src="~/js/profile.js"></script>
+@section Scripts{ 
+	<script>
+		<partial name="_ValidationScriptsPartial" />
+		const myDate = "@Model.DateOfBirth.ToString()";
+		formatDate(myDate);
+		handleToggleInput();
+		handleImageUpload();
+	</script>
+}
