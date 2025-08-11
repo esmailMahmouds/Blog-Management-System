@@ -10,11 +10,11 @@
 
 <script src="~/js/profile.js"></script>
 @section Scripts{ 
-	<script>
-		<partial name="_ValidationScriptsPartial" />
-		const myDate = "@Model.DateOfBirth.ToString()";
-		formatDate(myDate);
-		handleToggleInput();
-		handleImageUpload();
-	</script>
+	<partial name="_ValidationScriptsPartial" />
+<script>
+	const myDate = "@Model.DateOfBirth.ToString()";
+	formatDate(myDate);
+	handleToggleInput();
+	handleImageUpload();
+</script>
 }
