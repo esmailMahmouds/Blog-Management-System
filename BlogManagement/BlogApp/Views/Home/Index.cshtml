@@ -3,6 +3,15 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">Welcome to BlogApp</h1>
+    <p class="lead">Your platform for sharing thoughts and connecting with others.</p>
+    
+    <div class="mt-4">
+        <a asp-controller="Account" asp-action="SignUp" class="btn btn-primary btn-lg me-3">Get Started - Sign Up</a>
+        <a asp-controller="Account" asp-action="SignIn" class="btn btn-outline-primary btn-lg">Already have an account? Sign In</a>
+    </div>
+    
+    <hr class="my-5" />
+    
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>

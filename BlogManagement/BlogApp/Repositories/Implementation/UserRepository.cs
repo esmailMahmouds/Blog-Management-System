@@ -1,6 +1,7 @@
 ﻿using BlogApp.Context;
-using BlogApp.Models;
+using BlogApp.Models.DomainClasses;
 using BlogApp.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Repositories.Implementation
 {
@@ -13,14 +14,19 @@ namespace BlogApp.Repositories.Implementation
             _context = context;
         }
 
-        public Task AddUser(User user)
+        public async Task AddUser(User user)
         {
-            throw new NotImplementedException();
+            await _context.Users.AddAsync(user);
         }
 
-        public Task<User?> GetUserById(int id)
+        public async Task<User?> GetUserByEmail(string email)
         {
-            throw new NotImplementedException();
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<User?> GetUserById(int id)
+        {
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
         }
     }
 }

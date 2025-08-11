@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Models
+﻿namespace BlogApp.Models.DomainClasses
 {
 	public class Like
 	{

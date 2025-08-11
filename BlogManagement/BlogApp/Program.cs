@@ -1,4 +1,6 @@
+using BlogApp.Config;
 using BlogApp.Context;
+using BlogApp.DI;
 using BlogApp.Repositories.Implementation;
 using BlogApp.Repositories.Interfaces;
 using BlogApp.Services.Implementation;
@@ -6,8 +8,14 @@ using BlogApp.Services.Interfaces;
 using BlogApp.UnitOfWork.Implementation;
 using BlogApp.UnitOfWork.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add simple Serilog console logging
+builder.Host.UseSerilog((context, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .WriteTo.Console());
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -17,6 +25,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 );
 
 //register services and repositories
+builder.Services.AddAuthentication(builder.Configuration);
+builder.Services.AddSwaggerGen(SwaggerConfiguration.Configure);
+
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -26,6 +38,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Add Serilog request logging
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BlogApp.Models
+namespace BlogApp.Models.DomainClasses
 {
 	public class Follow
 	{
