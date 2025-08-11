@@ -39,6 +39,12 @@ namespace BlogApp.Context
 				relationship.DeleteBehavior = DeleteBehavior.Restrict;
 			}
 
+			modelBuilder.Entity<Country>()
+				.HasData(
+					new Country { Id = 1, Name = "Egypt" },
+					new Country { Id = 2, Name = "USA" },
+					new Country { Id = 3, Name = "KSA" }
+				);
 		}
 	}
 }
