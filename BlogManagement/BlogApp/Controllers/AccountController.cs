@@ -68,6 +68,14 @@ namespace BlogApp.Controllers
             {
                 //for simplicity, just redirect to home but in a real app, you'd set up authentication cookies
                 TempData["SuccessMessage"] = "Sign in successful!";
+
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                };
+                Response.Cookies.Append("Jwt", result.Data.AccessToken, cookieOptions);
+                
                 return RedirectToAction("Index", "Home");
             }
 
