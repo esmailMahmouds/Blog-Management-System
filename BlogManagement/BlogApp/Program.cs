@@ -1,3 +1,4 @@
+using System.Text;
 using BlogApp.Config;
 using BlogApp.Context;
 using BlogApp.DI;
@@ -7,7 +8,9 @@ using BlogApp.Services.Implementation;
 using BlogApp.Services.Interfaces;
 using BlogApp.UnitOfWork.Implementation;
 using BlogApp.UnitOfWork.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +33,7 @@ builder.Services.AddSwaggerGen(SwaggerConfiguration.Configure);
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 

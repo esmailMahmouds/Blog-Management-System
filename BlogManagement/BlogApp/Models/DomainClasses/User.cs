@@ -1,4 +1,5 @@
-﻿using BlogApp.Enums;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using BlogApp.Enums;
 
 namespace BlogApp.Models.DomainClasses
 {
@@ -12,6 +13,7 @@ namespace BlogApp.Models.DomainClasses
         public Role Role { get; set; } = Role.Author;
         public double? AverageRate { get; set; }
         public string? ImageURL { get; set; }
+        public byte[]? ProfileImage { get; set; }
 
         public int CountryId { get; set; }
         public Country? Country { get; set; }
