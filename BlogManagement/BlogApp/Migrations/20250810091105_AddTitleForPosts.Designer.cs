@@ -4,6 +4,7 @@ using BlogApp.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250810091105_AddTitleForPosts")]
+    partial class AddTitleForPosts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace BlogApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Category", b =>
+            modelBuilder.Entity("BlogApp.Models.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -43,7 +46,7 @@ namespace BlogApp.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Comment", b =>
+            modelBuilder.Entity("BlogApp.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -73,7 +76,7 @@ namespace BlogApp.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Country", b =>
+            modelBuilder.Entity("BlogApp.Models.Country", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,26 +91,9 @@ namespace BlogApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Countries");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Egypt"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "USA"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "KSA"
-                        });
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Follow", b =>
+            modelBuilder.Entity("BlogApp.Models.Follow", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -133,7 +119,7 @@ namespace BlogApp.Migrations
                     b.ToTable("Follows");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Like", b =>
+            modelBuilder.Entity("BlogApp.Models.Like", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -159,7 +145,7 @@ namespace BlogApp.Migrations
                     b.ToTable("Likes");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Post", b =>
+            modelBuilder.Entity("BlogApp.Models.Post", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -205,7 +191,7 @@ namespace BlogApp.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Rating", b =>
+            modelBuilder.Entity("BlogApp.Models.Rating", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -231,7 +217,7 @@ namespace BlogApp.Migrations
                     b.ToTable("Ratings");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.User", b =>
+            modelBuilder.Entity("BlogApp.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -239,7 +225,7 @@ namespace BlogApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<double?>("AverageRate")
+                    b.Property<double>("AverageRate")
                         .HasColumnType("float");
 
                     b.Property<int>("CountryId")
@@ -253,6 +239,7 @@ namespace BlogApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageURL")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -262,9 +249,6 @@ namespace BlogApp.Migrations
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("ProfileImage")
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
@@ -276,15 +260,15 @@ namespace BlogApp.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Comment", b =>
+            modelBuilder.Entity("BlogApp.Models.Comment", b =>
                 {
-                    b.HasOne("BlogApp.Models.DomainClasses.Post", "Post")
+                    b.HasOne("BlogApp.Models.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BlogApp.Models.DomainClasses.User", "User")
+                    b.HasOne("BlogApp.Models.User", "User")
                         .WithMany("Comments")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -295,15 +279,15 @@ namespace BlogApp.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Follow", b =>
+            modelBuilder.Entity("BlogApp.Models.Follow", b =>
                 {
-                    b.HasOne("BlogApp.Models.DomainClasses.User", "FollowerUser")
+                    b.HasOne("BlogApp.Models.User", "FollowerUser")
                         .WithMany("Followers")
                         .HasForeignKey("FollowerUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BlogApp.Models.DomainClasses.User", "FollowingUser")
+                    b.HasOne("BlogApp.Models.User", "FollowingUser")
                         .WithMany("Followings")
                         .HasForeignKey("FollowingUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -314,15 +298,15 @@ namespace BlogApp.Migrations
                     b.Navigation("FollowingUser");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Like", b =>
+            modelBuilder.Entity("BlogApp.Models.Like", b =>
                 {
-                    b.HasOne("BlogApp.Models.DomainClasses.Post", "Post")
+                    b.HasOne("BlogApp.Models.Post", "Post")
                         .WithMany("Likes")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BlogApp.Models.DomainClasses.User", "User")
+                    b.HasOne("BlogApp.Models.User", "User")
                         .WithMany("Likes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -333,15 +317,15 @@ namespace BlogApp.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Post", b =>
+            modelBuilder.Entity("BlogApp.Models.Post", b =>
                 {
-                    b.HasOne("BlogApp.Models.DomainClasses.Category", "Category")
+                    b.HasOne("BlogApp.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BlogApp.Models.DomainClasses.User", "User")
+                    b.HasOne("BlogApp.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -352,15 +336,15 @@ namespace BlogApp.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Rating", b =>
+            modelBuilder.Entity("BlogApp.Models.Rating", b =>
                 {
-                    b.HasOne("BlogApp.Models.DomainClasses.Post", "Post")
+                    b.HasOne("BlogApp.Models.Post", "Post")
                         .WithMany("Ratings")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BlogApp.Models.DomainClasses.User", "User")
+                    b.HasOne("BlogApp.Models.User", "User")
                         .WithMany("Ratings")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -371,9 +355,9 @@ namespace BlogApp.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.User", b =>
+            modelBuilder.Entity("BlogApp.Models.User", b =>
                 {
-                    b.HasOne("BlogApp.Models.DomainClasses.Country", "Country")
+                    b.HasOne("BlogApp.Models.Country", "Country")
                         .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -382,7 +366,7 @@ namespace BlogApp.Migrations
                     b.Navigation("Country");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.Post", b =>
+            modelBuilder.Entity("BlogApp.Models.Post", b =>
                 {
                     b.Navigation("Comments");
 
@@ -391,7 +375,7 @@ namespace BlogApp.Migrations
                     b.Navigation("Ratings");
                 });
 
-            modelBuilder.Entity("BlogApp.Models.DomainClasses.User", b =>
+            modelBuilder.Entity("BlogApp.Models.User", b =>
                 {
                     b.Navigation("Comments");
 

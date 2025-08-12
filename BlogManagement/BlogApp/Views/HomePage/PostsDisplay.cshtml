@@ -1,0 +1,35 @@
+﻿@{
+    Layout = "~/Views/Shared/_HomePage.cshtml";
+}
+
+@model IEnumerable<BlogApp.Models.Post>
+
+<div class="container my-4">
+    <h2 class="mb-4 text-primary">All Posts</h2>
+
+    <div class="row g-4">
+        @foreach (var post in Model)
+        {
+            <div class="col-md-4">
+                <a asp-controller="HomePage" asp-action="ViewPost" asp-route-id="@post.Id" style="text-decoration:none; color:inherit;">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-dark">@post.Title</h5>
+                            <p class="card-text text-muted" style="display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden;">
+                                @post.Content
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 d-flex justify-content-between">
+                            <span class="text-secondary">
+                                👍 @post.LikeCount Likes
+                            </span>
+                            <span class="text-warning">
+                                ⭐ @post.AverageRate.ToString("0.0") (@post.RateCount votes)
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
