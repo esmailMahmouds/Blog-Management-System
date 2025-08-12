@@ -75,8 +75,8 @@ namespace BlogApp.Controllers
                     Expires = DateTimeOffset.UtcNow.AddHours(1)
                 };
                 Response.Cookies.Append("Jwt", result.Data.AccessToken, cookieOptions);
-                
-                return RedirectToAction("Index", "Home");
+
+                return RedirectToAction("PostsDisplay", "HomePage");
             }
 
             ModelState.AddModelError("", result.Error ?? "Sign in failed");

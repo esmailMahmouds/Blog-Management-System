@@ -1,7 +1,4 @@
-﻿@model BlogApp.Models.Post
-@{
-    Layout = "~/Views/Shared/_HomePage.cshtml";
-}
+﻿@model BlogApp.Models.DomainClasses.Post
 
 <div class="container my-4">
     <h2 class="text-primary">@Model.Title</h2>
@@ -17,7 +14,7 @@
     <form asp-action="LikePost" method="post" class="d-inline">
         <input type="hidden" name="postId" value="@Model.Id" />
         <button type="submit" class="btn btn-lg border-0 bg-transparent p-0 text-primary" style="box-shadow: none; outline: none;">
-        @if (Model.Likes.Any(l => l.UserId == 1))
+        @if (ViewBag.CurrentUserId != null && Model.Likes.Any(l => l.UserId == ViewBag.CurrentUserId))
         {
             <i class="bi bi-hand-thumbs-up-fill"></i>
         }
@@ -33,7 +30,8 @@
 
         @for (int i = 1; i <= 5; i++)
         {
-            bool isFilled = Model.Ratings.FirstOrDefault(r => r.UserId == 1)?.Value >= i;
+            bool isFilled = ViewBag.CurrentUserId != null &&
+                Model.Ratings.FirstOrDefault(r => r.UserId == ViewBag.CurrentUserId)?.Value >= i;
             <button type="submit" name="rating" value="@i"
                     class="btn btn-link p-0 m-0" style="box-shadow: none; outline: none;">
                 <i class="bi @(isFilled ? "bi-star-fill text-warning" : "bi-star text-warning") fs-4"></i>

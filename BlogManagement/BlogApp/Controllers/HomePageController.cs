@@ -1,5 +1,7 @@
 ﻿using BlogApp.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BlogApp.Controllers
 {
@@ -25,34 +27,52 @@ namespace BlogApp.Controllers
             {
                 return NotFound();
             }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int? userId = userIdClaim != null ? int.Parse(userIdClaim) : (int?)null;
+
+            ViewBag.CurrentUserId = userId;
+
             return View(post);
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> LikePost(int postId)
         {
-            //todo: replace when merge with authentication
-            int userId = 1; 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
+
             await _postService.LikePost(postId, userId);
             return RedirectToAction("ViewPost", new { id = postId });
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> RatePost(int postId, double rating)
         {
-            //todo: replace when merge with authentication
-            int userId = 1;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
             await _postService.RatePost(postId, userId, rating);
             return RedirectToAction("ViewPost", new { id = postId });
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddComment(int postId, string content)
         {
-            //todo: replace when merge with authentication
-            int userId = 1;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
             await _postService.AddComment(postId, userId, content);
             return RedirectToAction("ViewPost", new { id = postId });
         }
-
     }
 }
