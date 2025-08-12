@@ -2,10 +2,18 @@
 
 @{
 	ViewData["Title"] = $"{Model.Name}";
+	var userInfoDto = new UserInfoDto
+			{
+				Name = Model.Name,
+				Email = Model.Email,
+				DateOfBirth = Model.DateOfBirth,
+				CountryId = Model.CountryId,
+				ProfileImageBytes = Model.ProfileImage
+			};
 }
 
 <div class="container-fluid d-flex justify-content-center">
-	<partial name="_UserInfo.cshtml" model="Model"/>
+	<partial name="_UserInfo.cshtml" model="@userInfoDto"/>
 </div>
 
 <script src="~/js/profile.js"></script>

@@ -1,0 +1,33 @@
+﻿.profile-form {
+    max-width: 800px;
+    width: 100%;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+}
+
+.profile-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    height: 150px;
+    border: 2px solid #dee2e6;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+#choose-image-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

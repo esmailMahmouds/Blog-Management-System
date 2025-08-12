@@ -1,11 +1,14 @@
-﻿@model User
+﻿@model UserInfoDto
+<link rel="stylesheet" href="~/css/Profile.css" asp-append-version="true" />
 
-<form method="post" asp-controller="Profile" asp-action="EditUserInfo"class="profile-form">
+<form method="post" asp-controller="Profile" asp-action="EditUserInfo" enctype="multipart/form-data" class="profile-form">
         <div class="form-group row pb-3">
             <div class="col-md-4">
                 <div class="profile-image-container mb-3">
                     <img id="profile-image-preview" 
-                         src="~/images/default.jpg" 
+                         loading = "lazy"
+                          src="@(Model.ProfileImageBase64 != null ?
+                            $"data:image/jpeg;base64,{Model.ProfileImageBase64}" : "/images/default.jpg")"
                          alt="Profile Image" 
                          class="profile-image" />
                 </div>
@@ -24,7 +27,7 @@
                         style="width: 16px; height: 16px; margin-right: 5px;">
                     Choose Image
                 </button>
-                <input type="hidden" asp-for="@Model.ImageURL" id="current-image-url" />
+               <input type="hidden" asp-for="@Model.ProfileImageBytes" id="current-image-data" />
             </div>
         <div class="col-md-8">
             <div class="form-group row pb-3">
@@ -71,38 +74,3 @@
         </div>
 </form>
    
-<style>
-    .profile-form {
-        max-width: 800px;
-        width: 100%;
-        background-color: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        margin-top: 20px;
-    }
-
-    .profile-image-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 150px;
-        height: 150px;
-        border: 2px solid #dee2e6;
-        border-radius: 50%;
-        overflow: hidden;
-        background-color: #f8f9fa;
-    }
-
-    .profile-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 50%;
-    }
-
-    #choose-image-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-</style>
