@@ -92,5 +92,74 @@ namespace BlogApp.Controllers
             _logger.LogWarning("JWT test failed: Unable to retrieve user information from token");
             return BadRequest("Unable to retrieve user information from token.");
         }
+
+        [HttpGet("DebugToken")]
+        public IActionResult DebugToken()
+        {
+            try
+            {
+                var testUser = new Models.DomainClasses.User
+                {
+                    Id = 123,
+                    Name = "Test User",
+                    Email = "test@example.com",
+                    Role = Enums.Role.Author
+                };
+
+                var jwtService = HttpContext.RequestServices.GetRequiredService<IJwtService>();
+                var token = jwtService.GenerateToken(testUser);
+
+                var userId = jwtService.GetUserIdFromToken(token);
+
+                return Ok(new
+                {
+                    GeneratedToken = token,
+                    ParsedUserId = userId,
+                    OriginalUserId = testUser.Id,
+                    Success = userId == testUser.Id
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message, StackTrace = ex.StackTrace });
+            }
+        }
+
+        [HttpGet("DebugCookie")]
+        public IActionResult DebugCookie()
+        {
+            try
+            {
+                if (Request.Cookies.TryGetValue("Jwt", out string? cookieToken) && !string.IsNullOrEmpty(cookieToken))
+                {
+                    var jwtService = HttpContext.RequestServices.GetRequiredService<IJwtService>();
+
+                    // Try to parse the cookie token
+                    var userId = jwtService.GetUserIdFromToken(cookieToken);
+
+                    return Ok(new
+                    {
+                        CookieToken = cookieToken,
+                        ParsedUserId = userId,
+                        Success = true
+                    });
+                }
+                else
+                {
+                    return BadRequest(new { Error = "No JWT cookie found" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message, StackTrace = ex.StackTrace });
+            }
+        }
+
+        [HttpGet("ClearCookie")]
+        public IActionResult ClearCookie()
+        {
+            Response.Cookies.Delete("Jwt");
+            return Ok(new { Message = "JWT cookie cleared" });
+        }
     }
 }

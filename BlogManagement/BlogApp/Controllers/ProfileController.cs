@@ -1,19 +1,18 @@
-﻿using System.Security.Claims;
-using BlogApp.Context;
+﻿using BlogApp.Context;
 using BlogApp.Models.DomainClasses;
 using BlogApp.Models.Dtos;
-using BlogApp.Services.Implementation;
 using BlogApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
 
 namespace BlogApp.Controllers
 {
     [Authorize]
     public class ProfileController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context; //delete this and pass userId to the service 
         private readonly ILogger<ProfileController> _logger;
         private readonly IProfileService _profileService;
         private readonly IJwtService _jwtService;
@@ -29,12 +28,19 @@ namespace BlogApp.Controllers
 
         public IActionResult Index()
         {
-            var currentUser = GetCurrentUser();
+            User? currentUser = null;
+
+            if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
+            {
+                var userId = _jwtService.GetUserIdFromToken(jwtToken);
+                currentUser = _context.Users.Find(userId); //delete this and pass userId to the service instead
+            }
+
             if (currentUser != null)
             {
-                var countries = _context.Countries.ToList();
+                var countries = _context.Countries.ToList(); //delete this and pass userId to the service
                 ViewBag.countries = new SelectList(countries, "Id", "Name");
-            
+
                 return View(currentUser);
             }
             else
@@ -54,7 +60,7 @@ namespace BlogApp.Controllers
                 var currentUser = GetCurrentUser();
                 bool check = await _profileService.EditUserInfoAsync(userInfoDto, currentUser);
 
-                if(check)
+                if (check)
                     TempData["SuccessMessage"] = "User Data updated successfully";
                 else
                     TempData["ErrorMessage"] = "User Data Can't be updated";
@@ -66,6 +72,7 @@ namespace BlogApp.Controllers
             return RedirectToAction("Index");
         }
 
+        //no need for this method anymore :D
         private User? GetCurrentUser()
         {
             var userIdclaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

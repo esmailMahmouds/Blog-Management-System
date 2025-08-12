@@ -19,6 +19,7 @@ namespace BlogApp.Services.Implementation
             var claims = new List<Claim>
             {
                 new (ClaimTypes.Name, user.Name),
+                new ("sub", user.Id.ToString()),
                 new (ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new (ClaimTypes.Role, user.Role.ToString()),
                 new (ClaimTypes.Email, user.Email)
