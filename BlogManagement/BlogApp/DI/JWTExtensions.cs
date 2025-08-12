@@ -39,6 +39,15 @@ namespace BlogApp.DI
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtKey))
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["Jwt"];
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             return services;
