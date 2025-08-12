@@ -1,0 +1,63 @@
+﻿@model BlogApp.Models.Post
+@{
+    Layout = "~/Views/Shared/_HomePage.cshtml";
+}
+
+<div class="container my-4">
+    <h2 class="text-primary">@Model.Title</h2>
+    <p class="text-muted">@Model.Content</p>
+
+    <div class="mb-3">
+        <span class="me-3">👍 @Model.LikeCount Likes</span>
+        <span>⭐ @Model.AverageRate.ToString("0.0") (@Model.RateCount votes)</span>
+    </div>
+
+    <hr />
+
+    <form asp-action="LikePost" method="post" class="d-inline">
+        <input type="hidden" name="postId" value="@Model.Id" />
+        <button type="submit" class="btn btn-lg border-0 bg-transparent p-0 text-primary" style="box-shadow: none; outline: none;">
+        @if (Model.Likes.Any(l => l.UserId == 1))
+        {
+            <i class="bi bi-hand-thumbs-up-fill"></i>
+        }
+        else
+        {
+            <i class="bi bi-hand-thumbs-up"></i>
+        }
+    </button>
+    </form>
+
+    <form asp-action="RatePost" method="post" class="d-inline ms-2">
+        <input type="hidden" name="postId" value="@Model.Id" />
+
+        @for (int i = 1; i <= 5; i++)
+        {
+            bool isFilled = Model.Ratings.FirstOrDefault(r => r.UserId == 1)?.Value >= i;
+            <button type="submit" name="rating" value="@i"
+                    class="btn btn-link p-0 m-0" style="box-shadow: none; outline: none;">
+                <i class="bi @(isFilled ? "bi-star-fill text-warning" : "bi-star text-warning") fs-4"></i>
+            </button>
+        }
+    </form>
+
+
+    <br />
+    <br />
+
+    <h4>Comments</h4>
+    <ul class="list-group mb-3">
+        @foreach (var comment in Model.Comments)
+        {
+            <li class="list-group-item">
+                <strong>@comment.User.Name:</strong> @comment.Content
+            </li>
+        }
+    </ul>
+
+    <form asp-action="AddComment" method="post">
+        <input type="hidden" name="postId" value="@Model.Id" />
+        <textarea name="content" class="form-control mb-2" placeholder="Add a comment..." required></textarea>
+        <button type="submit" class="btn btn-primary btn-sm">Comment</button>
+    </form>
+</div>

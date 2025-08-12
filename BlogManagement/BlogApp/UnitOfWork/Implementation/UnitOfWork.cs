@@ -35,7 +35,6 @@ namespace BlogApp.UnitOfWork.Implementation
             }
         }
 
-
         public async Task<int> Save()
         {
             return await _context.SaveChangesAsync();
