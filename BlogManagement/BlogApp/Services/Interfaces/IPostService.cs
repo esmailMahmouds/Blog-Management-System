@@ -1,4 +1,5 @@
 ﻿using BlogApp.Models.DomainClasses;
+using BlogApp.Models.Dtos;
 
 namespace BlogApp.Services.Interfaces
 {
@@ -9,5 +10,7 @@ namespace BlogApp.Services.Interfaces
         Task<bool> LikePost(int postId, int userId);
         Task<bool> RatePost(int postId, int userId, double rating);
         Task<bool> AddComment(int postId, int userId, string content);
+        Task CreatePost(CreatePostDto createPostDto, int userId);
+        Task<IEnumerable<Category>> GetAllCategories();
     }
 }

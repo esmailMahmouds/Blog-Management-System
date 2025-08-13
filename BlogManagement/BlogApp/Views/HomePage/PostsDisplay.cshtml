@@ -1,7 +1,15 @@
 ﻿@model IEnumerable<BlogApp.Models.DomainClasses.Post>
 
 <div class="container my-4">
-    <h2 class="mb-4 text-primary">All Posts</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">All Posts</h2>
+        @if (Context.Request.Cookies.ContainsKey("Jwt") && !string.IsNullOrEmpty(Context.Request.Cookies["Jwt"]))
+        {
+            <a asp-controller="Posts" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Post
+            </a>
+        }
+    </div>
 
     <div class="row g-4">
         @foreach (var post in Model)

@@ -105,5 +105,11 @@ namespace BlogApp.Repositories.Implementation
 
             return true;
         }
+
+        public async Task<Post> CreatePostAsync(Post post)
+        {
+            await _context.Posts.AddAsync(post);
+            return post;
+        }
     }
 }

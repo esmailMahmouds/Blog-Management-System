@@ -1,10 +1,12 @@
-﻿using BlogApp.Models.DomainClasses;
+﻿using BlogApp.Enums;
+using BlogApp.Models.DomainClasses;
+using BlogApp.Models.Dtos;
 using BlogApp.Services.Interfaces;
 using BlogApp.UnitOfWork.Interfaces;
 
 namespace BlogApp.Services.Implementation
 {
-    public class PostService : IPostService 
+    public class PostService : IPostService
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -49,5 +51,28 @@ namespace BlogApp.Services.Implementation
             return true;
         }
 
+        public async Task CreatePost(CreatePostDto createPostDto, int userId)
+        {
+            var post = new Post
+            {
+                Title = createPostDto.Title,
+                Content = createPostDto.Content,
+                CategoryId = createPostDto.CategoryId,
+                UserId = userId,
+                Status = PostStatus.Pending,
+                LikeCount = 0,
+                AverageRate = 0,
+                RateCount = 0,
+                CreateDate = DateTime.Now
+            };
+
+            await _unitOfWork.PostRepository.CreatePostAsync(post);
+            await _unitOfWork.Save();
+        }
+
+        public async Task<IEnumerable<Category>> GetAllCategories()
+        {
+            return await _unitOfWork.CategoryRepository.GetAllCategories();
+        }
     }
 }
