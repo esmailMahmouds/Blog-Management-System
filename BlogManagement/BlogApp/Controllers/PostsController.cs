@@ -63,5 +63,80 @@ namespace BlogApp.Controllers
                 return View(createPostDto);
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var post = await _postService.GetPostById(id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            Request.Cookies.TryGetValue("Jwt", out string? jwtToken);
+            if (string.IsNullOrEmpty(jwtToken))
+            {
+                return Unauthorized();
+            }
+
+            var userId = _jwtService.GetUserIdFromToken(jwtToken);
+            if (post.UserId != userId)
+            {
+                TempData["ErrorMessage"] = "You can only edit your own posts.";
+                return RedirectToAction("PostsDisplay", "HomePage");
+            }
+
+            var editPostDto = new EditPostDto
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                CategoryId = post.CategoryId
+            };
+
+            var categories = await _postService.GetAllCategories();
+            ViewBag.Categories = categories;
+            return View(editPostDto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(EditPostDto editPostDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                var categories = await _postService.GetAllCategories();
+                ViewBag.Categories = categories;
+                return View(editPostDto);
+            }
+
+            try
+            {
+                Request.Cookies.TryGetValue("Jwt", out string? jwtToken);
+                if (string.IsNullOrEmpty(jwtToken))
+                {
+                    return Unauthorized();
+                }
+
+                var userId = _jwtService.GetUserIdFromToken(jwtToken);
+                var updated = await _postService.UpdatePost(editPostDto, userId);
+
+                if (!updated)
+                {
+                    TempData["ErrorMessage"] = "Failed to update the post. You can only edit your own posts.";
+                    return RedirectToAction("PostsDisplay", "HomePage");
+                }
+
+                TempData["SuccessMessage"] = "Post updated successfully! It will be reviewed before being published.";
+                return RedirectToAction("ViewPost", "HomePage", new { id = editPostDto.Id });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while updating the post. Please try again.");
+                var categories = await _postService.GetAllCategories();
+                ViewBag.Categories = categories;
+                return View(editPostDto);
+            }
+        }
     }
 }

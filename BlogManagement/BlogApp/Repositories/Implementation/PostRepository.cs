@@ -111,5 +111,20 @@ namespace BlogApp.Repositories.Implementation
             await _context.Posts.AddAsync(post);
             return post;
         }
+
+        public async Task<bool> UpdatePostAsync(Post post)
+        {
+            var existingPost = await _context.Posts.FirstOrDefaultAsync(p => p.Id == post.Id);
+            if (existingPost == null)
+                return false;
+
+            existingPost.Title = post.Title;
+            existingPost.Content = post.Content;
+            existingPost.CategoryId = post.CategoryId;
+            existingPost.Status = PostStatus.Pending;
+
+            _context.Posts.Update(existingPost);
+            return true;
+        }
     }
 }

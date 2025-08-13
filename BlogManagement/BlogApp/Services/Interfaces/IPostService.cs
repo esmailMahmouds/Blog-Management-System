@@ -11,6 +11,7 @@ namespace BlogApp.Services.Interfaces
         Task<bool> RatePost(int postId, int userId, double rating);
         Task<bool> AddComment(int postId, int userId, string content);
         Task CreatePost(CreatePostDto createPostDto, int userId);
+        Task<bool> UpdatePost(EditPostDto editPostDto, int userId);
         Task<IEnumerable<Category>> GetAllCategories();
     }
 }

@@ -10,5 +10,6 @@ namespace BlogApp.Repositories.Interfaces
         Task<bool> AddRating(int postId, int userId, double rating);
         Task<bool> AddComment(int postId, int userId, string content);
         Task<Post> CreatePostAsync(Post post);
+        Task<bool> UpdatePostAsync(Post post);
     }
 }

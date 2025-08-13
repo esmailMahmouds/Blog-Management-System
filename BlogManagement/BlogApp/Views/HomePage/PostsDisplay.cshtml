@@ -15,15 +15,25 @@
         @foreach (var post in Model)
         {
             <div class="col-md-4">
-                <a asp-controller="HomePage" asp-action="ViewPost" asp-route-id="@post.Id" style="text-decoration:none; color:inherit;">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-body">
+                <div class="card shadow-sm border-0 h-100">
+                    @if (ViewBag.CurrentUserId != null && post.UserId == ViewBag.CurrentUserId)
+                    {
+                        <div class="card-header bg-transparent border-0 d-flex justify-content-end p-2">
+                            <a asp-controller="Posts" asp-action="Edit" asp-route-id="@post.Id" 
+                               class="btn btn-outline-primary btn-sm" title="Edit Post">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    }
+                    <a asp-controller="HomePage" asp-action="ViewPost" asp-route-id="@post.Id" style="text-decoration:none; color:inherit;">
+                        <div class="card-body @(ViewBag.CurrentUserId != null && post.UserId == ViewBag.CurrentUserId ? "pt-0" : "")">
                             <div class="d-flex justify-content-between align-items-start">
                                 <h5 class="card-title text-dark">@post.Title</h5>
                                 <span class="badge bg-light text-secondary border border-secondary">
                                     <i class="bi bi-tag-fill"></i> @post.Category.Name
                                 </span>
                             </div>
+                            <p class="text-muted mb-2"><small>by @post.User.Name</small></p>
                             <p class="card-text text-muted" style="display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden;">
                                 @post.Content
                             </p>
@@ -36,8 +46,8 @@
                                 ⭐ @post.AverageRate.ToString("0.0") (@post.RateCount votes)
                             </span>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
             </div>
         }
     </div>

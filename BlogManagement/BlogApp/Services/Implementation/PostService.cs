@@ -74,5 +74,32 @@ namespace BlogApp.Services.Implementation
         {
             return await _unitOfWork.CategoryRepository.GetAllCategories();
         }
+
+        public async Task<bool> UpdatePost(EditPostDto editPostDto, int userId)
+        {
+            //verify ownership
+            var existingPost = await _unitOfWork.PostRepository.GetPostById(editPostDto.Id);
+            if (existingPost == null)
+                return false;
+
+            //check that user is the owner of post
+            if (existingPost.UserId != userId)
+                return false;
+
+            var post = new Post
+            {
+                Id = editPostDto.Id,
+                Title = editPostDto.Title,
+                Content = editPostDto.Content,
+                CategoryId = editPostDto.CategoryId
+            };
+
+            var updated = await _unitOfWork.PostRepository.UpdatePostAsync(post);
+            if (!updated)
+                return false;
+
+            await _unitOfWork.Save();
+            return true;
+        }
     }
 }
