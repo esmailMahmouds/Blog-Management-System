@@ -43,7 +43,8 @@ namespace BlogApp.Services.Implementation
                     }
                 }
 
-                if (await _unitOfWork.UserRepository.GetUserByEmail(userInfoDto.Email) != null)
+                var alreadyExistsUser = await _unitOfWork.UserRepository.GetUserByEmail(userInfoDto.Email);
+                if (alreadyExistsUser != null && alreadyExistsUser.Id != currentUser.Id)
                 {
                     _logger.LogWarning("Edit Email failed: Email already exists");
                     result = Result<int>.Fail("Email already exists.");
@@ -55,6 +56,7 @@ namespace BlogApp.Services.Implementation
 
                 _unitOfWork.UserRepository.UpdateUser(currentUser);
                 await _unitOfWork.Save();
+                result = Result<int>.Ok(userId);
             }
             else
             {
