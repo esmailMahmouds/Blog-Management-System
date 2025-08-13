@@ -6,6 +6,8 @@ namespace BlogApp.Services.Interfaces
 {
     public interface IProfileService
     {
-        public  Task<bool> EditUserInfoAsync(UserInfoDto userInfoDto, User currentUser);
+        public Task<bool> EditUserInfoAsync(UserInfoDto userInfoDto, int userId);
+        public Task<User?> GetCurrentUser(int userId);
+        public Task<List<Country>> GetCountries();
     }
 }

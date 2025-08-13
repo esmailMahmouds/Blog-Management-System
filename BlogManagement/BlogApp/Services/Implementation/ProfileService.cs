@@ -9,20 +9,19 @@ namespace BlogApp.Services.Implementation
     public class ProfileService : IProfileService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IJwtService _jwtService;
         private readonly ILogger<AuthService> _logger;
 
-        public ProfileService(IUnitOfWork unitOfWork, IJwtService jwtService, ILogger<AuthService> logger)
+        public ProfileService(IUnitOfWork unitOfWork, ILogger<AuthService> logger)
         {
             _unitOfWork = unitOfWork;
-            _jwtService = jwtService;
             _logger = logger;
             
         }
 
-        public async Task<bool> EditUserInfoAsync(UserInfoDto userInfoDto,User currentUser)
+        public async Task<bool> EditUserInfoAsync(UserInfoDto userInfoDto, int userId)
         {
-            // var currentUser = await _unitOfWork.UserRepository.GetUserById(userId);
+            var currentUser = await GetCurrentUser(userId);
+
             if (currentUser != null)
             {
                 currentUser.Name = userInfoDto.Name;
@@ -40,6 +39,7 @@ namespace BlogApp.Services.Implementation
                     }
                 }
 
+                _unitOfWork.UserRepository.UpdateUser(currentUser);
                 await _unitOfWork.Save();
 
                 return true;
@@ -48,6 +48,16 @@ namespace BlogApp.Services.Implementation
             {
                 return false;
             }
+        }
+        
+        public async Task<User?> GetCurrentUser(int userId)
+        {
+            return await _unitOfWork.UserRepository.GetUserById(userId);
+        }
+
+        public async Task<List<Country>> GetCountries()
+        {
+            return (List<Country>) await _unitOfWork.CountryRepository.GetCountries();
         }
     }
 }

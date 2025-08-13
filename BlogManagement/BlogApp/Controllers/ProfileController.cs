@@ -12,33 +12,30 @@ namespace BlogApp.Controllers
     [Authorize]
     public class ProfileController : Controller
     {
-        private readonly ApplicationDbContext _context; //delete this and pass userId to the service 
         private readonly ILogger<ProfileController> _logger;
         private readonly IProfileService _profileService;
         private readonly IJwtService _jwtService;
 
-        public ProfileController(ApplicationDbContext context, ILogger<ProfileController> logger,
-            IProfileService profileService, IJwtService jwtService)
+        public ProfileController(ILogger<ProfileController> logger,IProfileService profileService, IJwtService jwtService)
         {
-            _context = context;
             _logger = logger;
             _profileService = profileService;
             _jwtService = jwtService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             User? currentUser = null;
 
             if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
             {
                 var userId = _jwtService.GetUserIdFromToken(jwtToken);
-                currentUser = _context.Users.Find(userId); //delete this and pass userId to the service instead
+                currentUser = await _profileService.GetCurrentUser(userId);
             }
 
             if (currentUser != null)
             {
-                var countries = _context.Countries.ToList(); //delete this and pass userId to the service
+                List<Country> countries = await _profileService.GetCountries();
                 ViewBag.countries = new SelectList(countries, "Id", "Name");
 
                 return View(currentUser);
@@ -54,11 +51,12 @@ namespace BlogApp.Controllers
         [HttpPost]
         public async Task<IActionResult> EditUserInfoAsync(UserInfoDto userInfoDto)
         {
-            string jwtToken;
-            if (Request.Cookies.TryGetValue("Jwt", out jwtToken))
+            
+            if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
             {
-                var currentUser = GetCurrentUser();
-                bool check = await _profileService.EditUserInfoAsync(userInfoDto, currentUser);
+                var userId = _jwtService.GetUserIdFromToken(jwtToken);
+               
+                bool check = await _profileService.EditUserInfoAsync(userInfoDto, userId);
 
                 if (check)
                     TempData["SuccessMessage"] = "User Data updated successfully";
@@ -68,22 +66,10 @@ namespace BlogApp.Controllers
             else
             {
                 TempData["ErrorMessage"] = "Token not valid";
+                _logger.LogError("Token not Valid");
             }
+
             return RedirectToAction("Index");
-        }
-
-        //no need for this method anymore :D
-        private User? GetCurrentUser()
-        {
-            var userIdclaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var user = new User();
-
-            if (userIdclaim != null && int.TryParse(userIdclaim, out int userId))
-            {
-                user = _context.Users.Find(userId);
-            }
-
-            return user;
         }
 
     }
