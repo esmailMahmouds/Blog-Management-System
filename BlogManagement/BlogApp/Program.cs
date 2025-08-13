@@ -1,4 +1,3 @@
-using System.Text;
 using BlogApp.Config;
 using BlogApp.Context;
 using BlogApp.DI;
@@ -8,9 +7,7 @@ using BlogApp.Services.Implementation;
 using BlogApp.Services.Interfaces;
 using BlogApp.UnitOfWork.Implementation;
 using BlogApp.UnitOfWork.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,6 +66,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

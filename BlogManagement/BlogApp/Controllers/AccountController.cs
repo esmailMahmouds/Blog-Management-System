@@ -74,7 +74,7 @@ namespace BlogApp.Controllers
                     HttpOnly = true,
                     Expires = DateTimeOffset.UtcNow.AddHours(1)
                 };
-                Response.Cookies.Append("Jwt", result.Data.AccessToken, cookieOptions);
+                Response.Cookies.Append("Jwt", result.Data?.AccessToken ?? "", cookieOptions);
 
                 return RedirectToAction("PostsDisplay", "HomePage");
             }
@@ -83,10 +83,49 @@ namespace BlogApp.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            if (!IsUserAuthenticated())
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult LogoutConfirmed()
+        {
+            _logger.LogInformation("User logout requested");
+
+            try
+            {
+                Response.Cookies.Delete("Jwt");
+
+                TempData["SuccessMessage"] = "You have been logged out successfully.";
+                _logger.LogInformation("User logged out successfully");
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception e)
+            {
+                TempData["ErrorMessage"] = "An error occurred during logout : " + e.Message;
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
         private void LoadCountries()
         {
             var countries = _context.Countries.ToList();
             ViewBag.countries = new SelectList(countries, "Id", "Name");
+        }
+
+        private bool IsUserAuthenticated()
+        {
+            return Request.Cookies.ContainsKey("Jwt") &&
+                   !string.IsNullOrEmpty(Request.Cookies["Jwt"]);
         }
     }
 }
