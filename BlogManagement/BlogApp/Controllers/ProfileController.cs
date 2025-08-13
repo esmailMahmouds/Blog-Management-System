@@ -56,12 +56,12 @@ namespace BlogApp.Controllers
             {
                 var userId = _jwtService.GetUserIdFromToken(jwtToken);
                
-                bool check = await _profileService.EditUserInfoAsync(userInfoDto, userId);
+                var result = await _profileService.EditUserInfoAsync(userInfoDto, userId);
 
-                if (check)
+                if (result.Success)
                     TempData["SuccessMessage"] = "User Data updated successfully";
                 else
-                    TempData["ErrorMessage"] = "User Data Can't be updated";
+                    TempData["ErrorMessage"] = result.Error;
             }
             else
             {

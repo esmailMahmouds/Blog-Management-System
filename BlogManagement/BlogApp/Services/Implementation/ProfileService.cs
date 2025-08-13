@@ -23,14 +23,13 @@ namespace BlogApp.Services.Implementation
             
         }
 
-        public async Task<bool> EditUserInfoAsync(UserInfoDto userInfoDto, int userId)
+        public async Task<Result<int>> EditUserInfoAsync(UserInfoDto userInfoDto, int userId)
         {
             var currentUser = await GetCurrentUser(userId);
-
+            var result = new Result<int>(); 
             if (currentUser != null)
             {
                 currentUser.Name = userInfoDto.Name;
-                currentUser.Email = userInfoDto.Email;
                 currentUser.DateOfBirth = userInfoDto.DateOfBirth;
                 currentUser.CountryId = userInfoDto.CountryId;
 
@@ -44,15 +43,25 @@ namespace BlogApp.Services.Implementation
                     }
                 }
 
+                if (await _unitOfWork.UserRepository.GetUserByEmail(userInfoDto.Email) != null)
+                {
+                    _logger.LogWarning("Edit Email failed: Email already exists");
+                    result = Result<int>.Fail("Email already exists.");
+                }
+                else
+                {
+                    currentUser.Email = userInfoDto.Email;
+                }
+
                 _unitOfWork.UserRepository.UpdateUser(currentUser);
                 await _unitOfWork.Save();
-
-                return true;
             }
             else
             {
-                return false;
+                result = Result<int>.Fail("User not Found");
             }
+
+            return result;
         }
 
 		public async Task<Result<int>> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId)
