@@ -7,6 +7,7 @@ namespace BlogApp.UnitOfWork.Interfaces
     {
         IPostRepository PostRepository { get; }
         public IUserRepository UserRepository { get; }
+        public ICategoryRepository CategoryRepository { get; }
 
         Task<int> Save();
     }

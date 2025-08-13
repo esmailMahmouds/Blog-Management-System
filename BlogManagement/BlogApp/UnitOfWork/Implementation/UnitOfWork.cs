@@ -13,6 +13,8 @@ namespace BlogApp.UnitOfWork.Implementation
         private IPostRepository _postRepository;
 
         private IUserRepository _userRepository;
+        
+        private ICategoryRepository _categoryRepository;
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -32,6 +34,14 @@ namespace BlogApp.UnitOfWork.Implementation
             get
             {
                 return _userRepository ??= new UserRepository(_context);
+            }
+        }
+
+        public ICategoryRepository CategoryRepository
+        {
+            get
+            {
+                return _categoryRepository ??= new CategoryRepository(_context);
             }
         }
 
