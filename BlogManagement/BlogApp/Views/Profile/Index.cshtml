@@ -10,19 +10,28 @@
 				CountryId = Model.CountryId,
 				ProfileImageBytes = Model.ProfileImage
 			};
+	var changePasswordDto = new ChangePasswordDto();
 }
 
-<div class="container-fluid d-flex justify-content-center">
+
+<div class="d-flex col justify-content-center">
 	<partial name="_UserInfo.cshtml" model="@userInfoDto"/>
+	<partial name="_ResetPassword.cshtml" model="@changePasswordDto"/>
+	<h1>My Followers</h1>
+
 </div>
+
 
 <script src="~/js/profile.js"></script>
 @section Scripts{ 
 	<partial name="_ValidationScriptsPartial" />
 <script>
 	const myDate = "@Model.DateOfBirth.ToString()";
-	formatDate(myDate);
-	handleToggleInput();
-	handleImageUpload();
+		document.addEventListener('DOMContentLoaded', function () {
+			formatDate(myDate);
+			handleToggleInput();
+			handleImageUpload();
+			handleResetPasswordButtons();
+	});
 </script>
 }
