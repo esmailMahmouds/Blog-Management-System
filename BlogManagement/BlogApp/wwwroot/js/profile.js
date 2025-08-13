@@ -76,33 +76,11 @@ function handleResetPasswordButtons() {
     changePasswordButton.removeAttribute('hidden');
 
     changePasswordButton.addEventListener('click', () => {
-        // Enable old password
         oldPasswordInput.removeAttribute('disabled');
-        // Show new password box
         newPasswordBox.classList.remove('invisible');
-        // Hide change password button
         changePasswordButton.setAttribute('hidden', '');
-        // Show update password button
         updatePasswordButton.removeAttribute('hidden');
-        // Focus on new password input
-        newPasswordInput.focus();
+        oldPasswordInput.focus();
     });
 
-    //updatePasswordButton.addEventListener('click', (e) => {
-    //    // Hide update password button
-    //    updatePasswordButton.setAttribute('hidden', '');
-
-    //    // Show change password button
-    //    changePasswordButton.removeAttribute('hidden');
-
-    //    // Hide new password box
-    //    newPasswordBox.classList.add('invisible');
-
-    //    // Disable and clear old password input
-    //    oldPasswordInput.setAttribute('disabled', '');
-    //    oldPasswordInput.value = '';
-
-    //    // Clear new password input
-    //    newPasswordInput.value = '';
-    //});
 }
