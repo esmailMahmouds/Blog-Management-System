@@ -1,14 +1,18 @@
 ﻿@model UserInfoDto
+
 <link rel="stylesheet" href="~/css/Profile.css" asp-append-version="true" />
 
-<form method="post" asp-controller="Profile" asp-action="EditUserInfo" enctype="multipart/form-data" class="profile-form">
+<div class="fw-bold" style="width:800px;">
+<form method="post" asp-controller="Profile" asp-action="EditUserInfo" enctype="multipart/form-data" 
+    class="profile-form" id="user-info-form">
         <div class="form-group row pb-3">
             <div class="col-md-4">
                 <div class="profile-image-container mb-3">
                     <img id="profile-image-preview" 
                          loading = "lazy"
                           src="@(Model.ProfileImageBase64 != null ?
-                            $"data:image/jpeg;base64,{Model.ProfileImageBase64}" : "/images/default.jpg")"
+                            $"data:image/jpeg;base64,{Model.ProfileImageBase64}" :
+                            "/images/Portrait_Placeholder.png")"
                          alt="Profile Image" 
                          class="profile-image" />
                 </div>
@@ -74,3 +78,4 @@
         </div>
 </form>
    
+</div>

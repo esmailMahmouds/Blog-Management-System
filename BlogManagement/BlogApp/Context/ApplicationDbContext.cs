@@ -39,12 +39,6 @@ namespace BlogApp.Context
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
 
-            modelBuilder.Entity<Country>()
-                .HasData(
-                    new Country { Id = 1, Name = "Egypt" },
-                    new Country { Id = 2, Name = "USA" },
-                    new Country { Id = 3, Name = "KSA" }
-                );
 
             modelBuilder.Entity<Category>()
                 .HasData(
@@ -54,6 +48,21 @@ namespace BlogApp.Context
                     new Category { Id = 4, Name = "Food", Description = "Posts about food and recipes" },
                     new Category { Id = 5, Name = "Sports", Description = "Posts about sports and fitness" }
                 );
-        }
-    }
+
+            modelBuilder.Entity<Country>()
+              .HasData(
+                new Country { Id = 1, Name = "Egypt" },
+                new Country { Id = 2, Name = "USA" },
+                new Country { Id = 3, Name = "KSA" },
+                new Country { Id = 4, Name = "China" },
+                new Country { Id = 5, Name = "Italy" },
+                new Country { Id = 6, Name = "UAE" },
+                new Country { Id = 7, Name = "Spain" },
+                new Country { Id = 8, Name = "Canda" },
+                new Country { Id = 9, Name = "Tunisa" },
+                new Country { Id = 10, Name = "Algeria" }
+                );
+		}
+	}
+
 }

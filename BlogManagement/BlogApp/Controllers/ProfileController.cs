@@ -12,33 +12,30 @@ namespace BlogApp.Controllers
     [Authorize]
     public class ProfileController : Controller
     {
-        private readonly ApplicationDbContext _context; //delete this and pass userId to the service 
         private readonly ILogger<ProfileController> _logger;
         private readonly IProfileService _profileService;
         private readonly IJwtService _jwtService;
 
-        public ProfileController(ApplicationDbContext context, ILogger<ProfileController> logger,
-            IProfileService profileService, IJwtService jwtService)
+        public ProfileController(ILogger<ProfileController> logger,IProfileService profileService, IJwtService jwtService)
         {
-            _context = context;
             _logger = logger;
             _profileService = profileService;
             _jwtService = jwtService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             User? currentUser = null;
 
             if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
             {
                 var userId = _jwtService.GetUserIdFromToken(jwtToken);
-                currentUser = _context.Users.Find(userId); //delete this and pass userId to the service instead
+                currentUser = await _profileService.GetCurrentUser(userId);
             }
 
             if (currentUser != null)
             {
-                var countries = _context.Countries.ToList(); //delete this and pass userId to the service
+                List<Country> countries = await _profileService.GetCountries();
                 ViewBag.countries = new SelectList(countries, "Id", "Name");
 
                 return View(currentUser);
@@ -54,37 +51,48 @@ namespace BlogApp.Controllers
         [HttpPost]
         public async Task<IActionResult> EditUserInfoAsync(UserInfoDto userInfoDto)
         {
-            string jwtToken;
-            if (Request.Cookies.TryGetValue("Jwt", out jwtToken))
+            
+            if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
             {
-                var currentUser = GetCurrentUser();
-                bool check = await _profileService.EditUserInfoAsync(userInfoDto, currentUser);
+                var userId = _jwtService.GetUserIdFromToken(jwtToken);
+               
+                var result = await _profileService.EditUserInfoAsync(userInfoDto, userId);
 
-                if (check)
+                if (result.Success)
                     TempData["SuccessMessage"] = "User Data updated successfully";
                 else
-                    TempData["ErrorMessage"] = "User Data Can't be updated";
+                    TempData["ErrorMessage"] = result.Error;
             }
             else
             {
                 TempData["ErrorMessage"] = "Token not valid";
+                _logger.LogError("Token not Valid");
             }
+
             return RedirectToAction("Index");
         }
 
-        //no need for this method anymore :D
-        private User? GetCurrentUser()
+        [HttpPost]
+        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
         {
-            var userIdclaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var user = new User();
+			if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
+			{
+				var userId = _jwtService.GetUserIdFromToken(jwtToken);
 
-            if (userIdclaim != null && int.TryParse(userIdclaim, out int userId))
-            {
-                user = _context.Users.Find(userId);
-            }
+				var  result = await _profileService.ChangePasswordAsync(changePasswordDto, userId);
 
-            return user;
-        }
+				if (result.Success)
+					TempData["SuccessMessage"] = "Password is changed successfully";
+				else
+					TempData["ErrorMessage"] = "Failed to Change Password\nOld Password is Wrong";
+			}
+			else
+			{
+				TempData["ErrorMessage"] = "Token not valid";
+				_logger.LogWarning("Token not Valid");
+			}
 
-    }
+			return RedirectToAction("Index");
+		}
+	}
 }
