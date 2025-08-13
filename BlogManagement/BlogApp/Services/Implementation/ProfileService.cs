@@ -1,7 +1,12 @@
-﻿using BlogApp.Models.DomainClasses;
+﻿using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using Azure.Core;
+using BlogApp.Contract;
+using BlogApp.Models.DomainClasses;
 using BlogApp.Models.Dtos;
 using BlogApp.Services.Interfaces;
 using BlogApp.UnitOfWork.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Services.Implementation
@@ -49,8 +54,37 @@ namespace BlogApp.Services.Implementation
                 return false;
             }
         }
-        
-        public async Task<User?> GetCurrentUser(int userId)
+
+		public async Task<Result<int>> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId)
+		{
+            var currentUser = await GetCurrentUser(userId);
+
+            if(currentUser != null)
+            {
+				var passwordHasher = new PasswordHasher<User>();
+				var passwordVerificationResult = passwordHasher.VerifyHashedPassword(currentUser, currentUser.Password, changePasswordDto.OldPassword);
+
+				if (passwordVerificationResult != PasswordVerificationResult.Success)
+				{
+					_logger.LogWarning("Old Password is Wrong");
+                    return Result<int>.Fail("Old Password is Wrong");
+				}
+                else
+                {
+                    currentUser.Password = new PasswordHasher<User>().HashPassword(currentUser, changePasswordDto.NewPassword);
+					_unitOfWork.UserRepository.UpdateUser(currentUser);
+                    await _unitOfWork.Save();
+                    return Result<int>.Ok(userId); ;
+                }
+			}
+            else
+            {
+                _logger.LogWarning($"No user with id#{userId} exists");
+                return Result<int>.Fail($"No user with id#{userId} exists");
+            }
+		}
+
+		public async Task<User?> GetCurrentUser(int userId)
         {
             return await _unitOfWork.UserRepository.GetUserById(userId);
         }
@@ -59,5 +93,5 @@ namespace BlogApp.Services.Implementation
         {
             return (List<Country>) await _unitOfWork.CountryRepository.GetCountries();
         }
-    }
+	}
 }

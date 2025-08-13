@@ -72,5 +72,27 @@ namespace BlogApp.Controllers
             return RedirectToAction("Index");
         }
 
-    }
+        [HttpPost]
+        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
+        {
+			if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
+			{
+				var userId = _jwtService.GetUserIdFromToken(jwtToken);
+
+				var  result = await _profileService.ChangePasswordAsync(changePasswordDto, userId);
+
+				if (result.Success)
+					TempData["SuccessMessage"] = "Password is changed successfully";
+				else
+					TempData["ErrorMessage"] = "Failed to Change Password\nOld Password is Wrong";
+			}
+			else
+			{
+				TempData["ErrorMessage"] = "Token not valid";
+				_logger.LogWarning("Token not Valid");
+			}
+
+			return RedirectToAction("Index");
+		}
+	}
 }

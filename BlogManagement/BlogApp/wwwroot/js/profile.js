@@ -8,12 +8,11 @@ function formatDate(myDate) {
 }
 
 function handleToggleInput() {
-    const editButton = document.getElementById('edit-button');
-    const updateButton = document.getElementById('update-button');
-    const myInputs = document.getElementsByClassName('form-control');
+    const userInfoForm = document.getElementById('user-info-form');
+    const myInputs = userInfoForm.querySelectorAll('.form-control');
+    const editButton = userInfoForm.querySelector('#edit-button');
+    const updateButton = userInfoForm.querySelector('#update-button');
     const chooseImageButton = document.getElementById('choose-image-button');
-    const profileImageInput = document.getElementById('profile-image-input');
-    const profileImagePreview = document.getElementById('profile-image-preview');
 
     editButton.addEventListener('click', () => {
         for (const input of myInputs) {
@@ -36,9 +35,14 @@ function handleToggleInput() {
 }
 
 function handleImageUpload() {
-    const chooseImageButton = document.getElementById('choose-image-button');
-    const profileImageInput = document.getElementById('profile-image-input');
-    const profileImagePreview = document.getElementById('profile-image-preview');
+    const userInfoForm = document.getElementById('user-info-form');
+    if (!userInfoForm) return;
+
+    const chooseImageButton = userInfoForm.querySelector('#choose-image-button');
+    const profileImageInput = userInfoForm.querySelector('#profile-image-input');
+    const profileImagePreview = userInfoForm.querySelector('#profile-image-preview');
+
+    if (!chooseImageButton || !profileImageInput || !profileImagePreview) return;
 
     chooseImageButton.addEventListener('click', () => {
         profileImageInput.click();
@@ -54,4 +58,51 @@ function handleImageUpload() {
             reader.readAsDataURL(file);
         }
     });
+}
+
+function handleResetPasswordButtons() {
+    const resetPasswordForm = document.getElementById('reset-password-form');
+    if (!resetPasswordForm) return;
+
+    const oldPasswordInput = resetPasswordForm.querySelector('#OldPassword');
+    const newPasswordBox = resetPasswordForm.querySelector('#new-password-box');
+    const newPasswordInput = resetPasswordForm.querySelector('#NewPassword');
+    const changePasswordButton = resetPasswordForm.querySelector('#change-password-button');
+    const updatePasswordButton = resetPasswordForm.querySelector('#update-password-button');
+
+    oldPasswordInput.setAttribute('disabled', '');
+    newPasswordBox.classList.add('invisible');
+    updatePasswordButton.setAttribute('hidden', '');
+    changePasswordButton.removeAttribute('hidden');
+
+    changePasswordButton.addEventListener('click', () => {
+        // Enable old password
+        oldPasswordInput.removeAttribute('disabled');
+        // Show new password box
+        newPasswordBox.classList.remove('invisible');
+        // Hide change password button
+        changePasswordButton.setAttribute('hidden', '');
+        // Show update password button
+        updatePasswordButton.removeAttribute('hidden');
+        // Focus on new password input
+        newPasswordInput.focus();
+    });
+
+    //updatePasswordButton.addEventListener('click', (e) => {
+    //    // Hide update password button
+    //    updatePasswordButton.setAttribute('hidden', '');
+
+    //    // Show change password button
+    //    changePasswordButton.removeAttribute('hidden');
+
+    //    // Hide new password box
+    //    newPasswordBox.classList.add('invisible');
+
+    //    // Disable and clear old password input
+    //    oldPasswordInput.setAttribute('disabled', '');
+    //    oldPasswordInput.value = '';
+
+    //    // Clear new password input
+    //    newPasswordInput.value = '';
+    //});
 }
