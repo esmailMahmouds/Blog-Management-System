@@ -77,12 +77,12 @@ namespace BlogApp.Services.Implementation
 
         public async Task<bool> UpdatePost(EditPostDto editPostDto, int userId)
         {
-            //verify ownership
+            // Get the existing post to verify ownership
             var existingPost = await _unitOfWork.PostRepository.GetPostById(editPostDto.Id);
             if (existingPost == null)
                 return false;
 
-            //check that user is the owner of post
+            // Check if the user is the owner of the post
             if (existingPost.UserId != userId)
                 return false;
 
@@ -96,6 +96,23 @@ namespace BlogApp.Services.Implementation
 
             var updated = await _unitOfWork.PostRepository.UpdatePostAsync(post);
             if (!updated)
+                return false;
+
+            await _unitOfWork.Save();
+            return true;
+        }
+
+        public async Task<bool> DeletePost(int postId, int userId)
+        {
+            var existingPost = await _unitOfWork.PostRepository.GetPostById(postId);
+            if (existingPost == null)
+                return false;
+
+            if (existingPost.UserId != userId)
+                return false;
+
+            var deleted = await _unitOfWork.PostRepository.DeletePostAsync(postId);
+            if (!deleted)
                 return false;
 
             await _unitOfWork.Save();

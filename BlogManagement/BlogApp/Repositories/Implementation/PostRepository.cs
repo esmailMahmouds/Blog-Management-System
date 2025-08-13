@@ -126,5 +126,35 @@ namespace BlogApp.Repositories.Implementation
             _context.Posts.Update(existingPost);
             return true;
         }
+
+        public async Task<bool> DeletePostAsync(int postId)
+        {
+            var post = await _context.Posts
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .Include(p => p.Ratings)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return false;
+
+            if (post.Comments?.Any() == true)
+            {
+                _context.Comments.RemoveRange(post.Comments);
+            }
+
+            if (post.Likes?.Any() == true)
+            {
+                _context.Likes.RemoveRange(post.Likes);
+            }
+
+            if (post.Ratings?.Any() == true)
+            {
+                _context.Ratings.RemoveRange(post.Ratings);
+            }
+
+            _context.Posts.Remove(post);
+            return true;
+        }
     }
 }

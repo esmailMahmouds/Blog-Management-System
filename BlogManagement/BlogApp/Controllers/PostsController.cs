@@ -138,5 +138,36 @@ namespace BlogApp.Controllers
                 return View(editPostDto);
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                Request.Cookies.TryGetValue("Jwt", out string? jwtToken);
+                if (string.IsNullOrEmpty(jwtToken))
+                {
+                    return Unauthorized();
+                }
+
+                var userId = _jwtService.GetUserIdFromToken(jwtToken);
+                var deleted = await _postService.DeletePost(id, userId);
+
+                if (!deleted)
+                {
+                    TempData["ErrorMessage"] = "Failed to delete the post. You can only delete your own posts.";
+                    return RedirectToAction("PostsDisplay", "HomePage");
+                }
+
+                TempData["SuccessMessage"] = "Post deleted successfully.";
+                return RedirectToAction("PostsDisplay", "HomePage");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting the post. Please try again.";
+                return RedirectToAction("PostsDisplay", "HomePage");
+            }
+        }
     }
 }

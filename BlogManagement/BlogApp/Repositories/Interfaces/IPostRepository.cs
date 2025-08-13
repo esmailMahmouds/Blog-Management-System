@@ -11,5 +11,6 @@ namespace BlogApp.Repositories.Interfaces
         Task<bool> AddComment(int postId, int userId, string content);
         Task<Post> CreatePostAsync(Post post);
         Task<bool> UpdatePostAsync(Post post);
+        Task<bool> DeletePostAsync(int postId);
     }
 }
