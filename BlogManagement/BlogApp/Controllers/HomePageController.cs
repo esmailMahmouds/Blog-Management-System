@@ -8,15 +8,37 @@ namespace BlogApp.Controllers
     public class HomePageController : Controller
     {
         private readonly IPostService _postService;
+        private readonly IJwtService _jwtService;
 
-        public HomePageController(IPostService postService)
+        public HomePageController(IPostService postService, IJwtService jwtService)
         {
             _postService = postService;
+            _jwtService = jwtService;
         }
 
         public async Task<IActionResult> PostsDisplay()
         {
             var posts = await _postService.GetAllPosts();
+
+
+            Request.Cookies.TryGetValue("Jwt", out string? jwtToken);
+            if (!string.IsNullOrEmpty(jwtToken))
+            {
+                try
+                {
+                    var userId = _jwtService.GetUserIdFromToken(jwtToken);
+                    ViewBag.CurrentUserId = userId;
+                }
+                catch
+                {
+                    ViewBag.CurrentUserId = null;
+                }
+            }
+            else
+            {
+                ViewBag.CurrentUserId = null;
+            }
+
             return View(posts);
         }
 
