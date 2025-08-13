@@ -28,5 +28,11 @@ namespace BlogApp.Repositories.Implementation
         {
             return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
         }
+
+        public User? UpdateUser(User user)
+        {
+            var entityEntry =  _context.Users.Update(user);
+            return entityEntry.Entity;
+        }
     }
 }
