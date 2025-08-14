@@ -13,9 +13,9 @@ namespace BlogApp.Services.Implementation
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<Post>> GetAllPosts()
+        public async Task<(IEnumerable<Post> Posts, int TotalCount)> GetAllPosts(int page, int pageSize)
         {
-            return await _unitOfWork.PostRepository.GetAllPosts();
+            return await _unitOfWork.PostRepository.GetAllPosts(page, pageSize);
         }
         public async Task<Post?> GetPostById(int id)
         {

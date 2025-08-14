@@ -5,7 +5,7 @@ namespace BlogApp.Repositories.Interfaces
 {
     public interface IPostRepository
     {
-        Task<IEnumerable<Post>> GetAllPosts();
+        Task<(IEnumerable<Post>, int)> GetAllPosts(int page, int pageSize);
         Task<Post?> GetPostById(int id);
         Task<bool> AddLike(int postId, int userId);
         Task<bool> AddRating(int postId, int userId, double rating);

@@ -15,9 +15,15 @@ namespace BlogApp.Controllers
             _postService = postService;
         }
 
-        public async Task<IActionResult> PostsDisplay()
+        public async Task<IActionResult> PostsDisplay(int? page)
         {
-            var posts = await _postService.GetAllPosts();
+            int pageSize = 15; 
+            int currentPage = page ?? 1; 
+            var (posts, totalCount) = await _postService.GetAllPosts(currentPage, pageSize);
+
+            ViewBag.CurrentPage = currentPage;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
             return View(posts);
         }
 

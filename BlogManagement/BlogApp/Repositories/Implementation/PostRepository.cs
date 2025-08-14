@@ -14,17 +14,22 @@ namespace BlogApp.Repositories.Implementation
         {
             _context = context;
         }
-        public async Task<IEnumerable<Post>> GetAllPosts()
+        public async Task<(IEnumerable<Post>, int)> GetAllPosts(int page, int pageSize)
         {
-            return await _context.Posts
+            if (page < 1) page = 1;
+            var query = _context.Posts
                 .Where(p => p.Status == PostStatus.Approved)
                 .Include(p => p.User)
                 .Include(p => p.Category)
                 .Include(p => p.Comments)
                 .Include(p => p.Ratings)
                 .Include(p => p.Likes)
-                .OrderByDescending(p => p.CreateDate)
-                .ToListAsync();
+                .OrderByDescending(p => p.CreateDate);
+
+            var totalCount = await query.CountAsync();
+            var posts = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return (posts, totalCount);
         }
         public async Task<Post?> GetPostById(int id)
         {
