@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Welcome to BlogApp";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to BlogApp</h1>
+    <p class="lead">Your platform for sharing thoughts and connecting with others.</p>
+    
+    <div class="mt-4">
+        <a asp-controller="Account" asp-action="SignUp" class="btn btn-primary btn-lg me-3">Get Started - Sign Up</a>
+        <a asp-controller="Account" asp-action="SignIn" class="btn btn-outline-primary btn-lg">Already have an account? Sign In</a>
+    </div>
+    
+    <hr class="my-5" />
+    
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Create Posts</h5>
+                    <p class="card-text">Share your thoughts and ideas with the community through engaging blog posts.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-comments fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Engage & Comment</h5>
+                    <p class="card-text">Join the conversation by commenting on posts and connecting with other users.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Rate & Like</h5>
+                    <p class="card-text">Show appreciation for great content by liking and rating posts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-5">
+        <p class="text-muted">Join thousands of users sharing their stories and connecting with others.</p>
+    </div>
+</div>

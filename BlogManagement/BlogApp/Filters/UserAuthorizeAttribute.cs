@@ -1,11 +1,10 @@
-using BlogApp.Enums;
 using BlogApp.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace BlogApp.Filters
 {
-    public class AdminAuthorizeAttribute : ActionFilterAttribute
+    public class UserAuthorizeAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
@@ -13,7 +12,9 @@ namespace BlogApp.Filters
 
             if (jwtService == null)
             {
-                context.Result = new RedirectToActionResult("Index", "Landing", null);
+                var controller = (Controller)context.Controller;
+                controller.TempData["ErrorMessage"] = "Authentication service unavailable.";
+                context.Result = new RedirectToActionResult("SignIn", "Account", null);
                 return;
             }
 
@@ -29,19 +30,19 @@ namespace BlogApp.Filters
 
             try
             {
-                Role userRole = jwtService.GetUserRoleFromToken(jwtToken);
-                if (userRole != Role.Admin)
+                var userId = jwtService.GetUserIdFromToken(jwtToken);
+                if (userId <= 0)
                 {
                     var controller = (Controller)context.Controller;
-                    controller.TempData["ErrorMessage"] = "Access denied. Admin privileges required.";
-                    context.Result = new RedirectToActionResult("Index", "Landing", null);
+                    controller.TempData["ErrorMessage"] = "Invalid authentication token.";
+                    context.Result = new RedirectToActionResult("SignIn", "Account", null);
                     return;
                 }
             }
             catch
             {
                 var controller = (Controller)context.Controller;
-                controller.TempData["ErrorMessage"] = "Invalid authentication token.";
+                controller.TempData["ErrorMessage"] = "Invalid or expired authentication token. Please sign in again.";
                 context.Result = new RedirectToActionResult("SignIn", "Account", null);
                 return;
             }

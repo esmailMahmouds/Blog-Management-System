@@ -106,7 +106,7 @@ namespace BlogApp.Controllers
         {
             if (!IsUserAuthenticated())
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Landing");
             }
 
             return View();
@@ -125,12 +125,12 @@ namespace BlogApp.Controllers
                 TempData["SuccessMessage"] = "You have been logged out successfully.";
                 _logger.LogInformation("User logged out successfully");
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Landing");
             }
             catch (Exception e)
             {
                 TempData["ErrorMessage"] = "An error occurred during logout : " + e.Message;
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Landing");
             }
         }
 

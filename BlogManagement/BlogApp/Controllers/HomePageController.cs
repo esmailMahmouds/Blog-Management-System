@@ -1,10 +1,12 @@
-﻿using BlogApp.Services.Interfaces;
+﻿using BlogApp.Filters;
+using BlogApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace BlogApp.Controllers
 {
+    [UserAuthorize]
     public class HomePageController : Controller
     {
         private readonly IPostService _postService;
@@ -66,7 +68,6 @@ namespace BlogApp.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> LikePost(int postId)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -79,7 +80,6 @@ namespace BlogApp.Controllers
             return RedirectToAction("ViewPost", new { id = postId });
         }
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> RatePost(int postId, double rating)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -92,7 +92,6 @@ namespace BlogApp.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> AddComment(int postId, string content)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -118,7 +117,6 @@ namespace BlogApp.Controllers
 
             return RedirectToAction("ViewPost", new { id = postId });
         }
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> DeleteComment(int id, int postId)
         {
