@@ -54,3 +54,4 @@ TestResult.xml
 nunit-*.xml
 
 BlogManagement/BlogApp/appsettings.json
+BlogManagement/.vs/
