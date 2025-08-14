@@ -71,7 +71,7 @@ namespace BlogApp.Services.Implementation
             if (comment == null) return false;
 
             // Rule: User deletes own, Admin can delete any
-            if (comment.UserId != userId && !isAdmin) return false;
+            if (comment.UserId != userId && !isAdmin && comment.Post.UserId != userId) return false;
 
             await _unitOfWork.PostRepository.DeleteComment(comment);
             await _unitOfWork.Save();

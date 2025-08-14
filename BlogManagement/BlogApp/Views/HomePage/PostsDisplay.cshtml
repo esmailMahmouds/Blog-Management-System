@@ -1,8 +1,8 @@
 ﻿@model IEnumerable<BlogApp.Models.DomainClasses.Post>
 
 <div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-primary">All Posts</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h2 class="text-primary fw-bold display-6 mb-0">All Posts</h2>
         @if (Context.Request.Cookies.ContainsKey("Jwt") && !string.IsNullOrEmpty(Context.Request.Cookies["Jwt"]))
         {
             <a asp-controller="Posts" asp-action="Create" class="btn btn-primary">
