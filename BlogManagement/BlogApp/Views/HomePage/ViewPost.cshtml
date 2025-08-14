@@ -1,201 +1,238 @@
 ﻿@model BlogApp.Models.DomainClasses.Post
 
-<div class="container my-4">
+@{
+    var currentUserIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    int? currentUserId = currentUserIdClaim != null ? int.Parse(currentUserIdClaim) : (int?)null;
+}
 
-    <div class="d-flex justify-content-between align-items-start mb-3">
-        <h2 class="text-primary">@Model.Title</h2>
-        @if (ViewBag.CurrentUserId != null && Model.UserId == ViewBag.CurrentUserId)
-        {
-            <div class="d-flex gap-2">
-                <a asp-controller="Posts" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-pencil"></i> Edit Post
-                </a>
-                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="bi bi-trash"></i> Delete Post
-                </button>
+<div class="container my-5">
+
+    <!-- Post Card -->
+    <div class="card shadow-lg rounded-4 border-0 overflow-hidden">
+        <!-- Gradient Header -->
+        <div class="card-header bg-primary bg-gradient text-white d-flex justify-content-between align-items-center py-3 px-4">
+            <h1 class="h3 mb-0">@Model.Title</h1>
+            @if (ViewBag.CurrentUserId != null && Model.UserId == ViewBag.CurrentUserId)
+            {
+                <div class="d-flex gap-2">
+                    <a asp-controller="Posts" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-light btn-sm fw-bold">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            }
+        </div>
+
+        <div class="card-body p-4">
+            <!-- Tags & Meta -->
+            <div class="mb-3">
+                <span class="badge bg-secondary me-2"><i class="bi bi-tag-fill"></i> @Model.Category.Name</span>
+                <span class="text-muted">by <strong>@Model.User.Name</strong> • @Model.CreateDate.ToString("MMM dd, yyyy")</span>
             </div>
-        }
-    </div>
-    
-    <div class="mb-3">
-        <span class="badge bg-light text-secondary border border-secondary">
-            <i class="bi bi-tag-fill"></i> @Model.Category.Name
-        </span>
-        <span class="text-muted ms-2">by @Model.User.Name on @Model.CreateDate.ToString("MMM dd, yyyy")</span>
-    </div>
 
-
-    <!-- Author Info -->
-    <div class="d-flex align-items-center mb-3 p-3 bg-light rounded shadow-sm">
-        @if (!string.IsNullOrEmpty(Model.User.ImageURL) || Model.User.ProfileImage != null)
-        {
-            <img src="@(Model.User.ImageURL ?? $"data:image/png;base64,{Convert.ToBase64String(Model.User.ProfileImage)}")"
-                 alt="@Model.User.Name"
-                 class="rounded-circle me-3"
-                 style="width: 60px; height: 60px; object-fit: cover;">
-        }
-        else
-        {
-            <div class="rounded-circle text-white d-flex justify-content-center align-items-center me-3 fw-bold"
-                 style="width: 60px; height: 60px; font-size: 1.5rem; background-color: #6c757d;">
-                @Model.User.Name[0]
-            </div>
-        }
-
-        <div>
-            <h5 class="mb-0 text-primary fw-bold">@Model.User.Name</h5>
-            <small class="text-muted">
-                @Model.User.Role.ToString()
-                @if (Model.User.Country != null)
+            <!-- Author Info -->
+            <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-3 shadow-sm">
+                @if (!string.IsNullOrEmpty(Model.User.ImageURL) || Model.User.ProfileImage != null)
                 {
-                    <span> • @Model.User.Country.Name</span>
+                    <img src="@(Model.User.ImageURL ?? $"data:image/png;base64,{Convert.ToBase64String(Model.User.ProfileImage)}")"
+                         alt="@Model.User.Name"
+                         class="rounded-circle me-3 border border-primary"
+                         style="width: 70px; height: 70px; object-fit: cover;">
                 }
-            </small>
-            <div class="text-muted" style="font-size: 0.85rem;">
-                Posted on @Model.CreateDate.ToString("MMMM dd, yyyy")
+                else
+                {
+                    <div class="rounded-circle text-white d-flex justify-content-center align-items-center me-3 fw-bold bg-secondary"
+                         style="width: 70px; height: 70px; font-size: 1.8rem;">
+                        @Model.User.Name[0]
+                    </div>
+                }
+                <div>
+                    <h5 class="mb-1 text-primary fw-bold">
+                        @Model.User.Name
+                        @if (currentUserId.HasValue && currentUserId.Value == Model.User.Id)
+                        {
+                            <span class="text-secondary fw-normal"> (You)</span>
+                        }
+                    </h5>
+                    <small class="text-muted">
+                        @Model.User.Role.ToString()
+                        @if (Model.User.Country != null)
+                        {
+                            <span> • @Model.User.Country.Name</span>
+                        }
+                    </small>
+                    <div class="text-muted small">Posted on @Model.CreateDate.ToString("MMMM dd, yyyy")</div>
+                </div>
             </div>
+
+            <!-- Post Content -->
+            <p class="fs-5 text-dark">@Model.Content</p>
+
+            <!-- Engagement -->
+            <div class="d-flex align-items-center gap-3 mt-4 mb-3">
+                <span class="fw-semibold">👍 @Model.LikeCount Likes</span>
+                <span class="fw-semibold">⭐ @Model.AverageRate.ToString("0.0") (@Model.RateCount votes)</span>
+            </div>
+
+            <!-- Like Button -->
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <form asp-action="LikePost" method="post" class="d-inline" id="like-form">
+                    <input type="hidden" name="postId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-lg btn-link p-0 m-0 text-primary position-relative" id="like-btn">
+                        @if (ViewBag.CurrentUserId != null && Model.Likes.Any(l => l.UserId == ViewBag.CurrentUserId))
+                        {
+                            <i class="bi bi-hand-thumbs-up-fill fs-2"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-hand-thumbs-up fs-2"></i>
+                        }
+                    </button>
+                </form>
+
+                <!-- Star Rating -->
+                <form asp-action="RatePost" method="post" class="d-inline" id="star-rating-form">
+                    <input type="hidden" name="postId" value="@Model.Id" />
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        bool isFilled = ViewBag.CurrentUserId != null &&
+                        Model.Ratings.FirstOrDefault(r => r.UserId == ViewBag.CurrentUserId)?.Value >= i;
+                        <button type="submit" name="rating" value="@i" class="btn btn-link p-0 m-0 star-btn" style="transition: transform 0.2s;">
+                            <i class="bi @(isFilled ? "bi-star-fill text-warning" : "bi-star text-warning") fs-3"></i>
+                        </button>
+                    }
+                </form>
+            </div>
+
+            <hr class="my-4" />
+
+            <!-- Comments Section -->
+            <h4 class="mb-3">Comments (@Model.Comments.Count())</h4>
+            <ul class="list-group list-group-flush mb-3">
+                @foreach (var comment in Model.Comments)
+                {
+                    <li class="list-group-item rounded-3 shadow-sm mb-2 p-3 d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>
+                                @if (currentUserId == comment.UserId)
+                                {
+                                    @comment.User.Name <span class="text-secondary">(You)</span>
+                                }
+                                else
+                                {
+                                    @comment.User.Name
+                                }
+                            </strong>: @comment.Content
+                        </div>
+                        <div class="d-flex gap-1">
+                            @if (currentUserId == comment.UserId)
+                            {
+                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#editCommentModal-@comment.Id">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            }
+
+                            @if (currentUserId == comment.UserId || User.IsInRole("Admin") || currentUserId == Model.UserId)
+                            {
+                                <form asp-action="DeleteComment" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@comment.Id" />
+                                    <input type="hidden" name="postId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Are you sure you want to delete this comment?');">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            <!-- Add Comment -->
+            <form asp-action="AddComment" method="post" class="mt-3">
+                <input type="hidden" name="postId" value="@Model.Id" />
+                <textarea name="content" class="form-control mb-2" placeholder="Add a comment..." required></textarea>
+                <button type="submit" class="btn btn-primary fw-bold">Comment</button>
+            </form>
         </div>
     </div>
-
-    <h2 class="text-primary">@Model.Title</h2>
-
-    <p class="text-muted">@Model.Content</p>
-
-    <div class="mb-3">
-        <span class="me-3">👍 @Model.LikeCount Likes</span>
-        <span>⭐ @Model.AverageRate.ToString("0.0") (@Model.RateCount votes)</span>
-    </div>
-
-    <hr />
-
-    <!-- Like -->
-    <form asp-action="LikePost" method="post" class="d-inline">
-        <input type="hidden" name="postId" value="@Model.Id" />
-        <button type="submit" class="btn btn-lg border-0 bg-transparent p-0 text-primary" style="box-shadow: none; outline: none;">
-            @if (ViewBag.CurrentUserId != null && Model.Likes.Any(l => l.UserId == ViewBag.CurrentUserId))
-            {
-                <i class="bi bi-hand-thumbs-up-fill"></i>
-            }
-            else
-            {
-                <i class="bi bi-hand-thumbs-up"></i>
-            }
-        </button>
-    </form>
-
-    <!-- Rating -->
-    <form asp-action="RatePost" method="post" class="d-inline ms-2">
-        <input type="hidden" name="postId" value="@Model.Id" />
-        @for (int i = 1; i <= 5; i++)
-        {
-            bool isFilled = ViewBag.CurrentUserId != null &&
-            Model.Ratings.FirstOrDefault(r => r.UserId == ViewBag.CurrentUserId)?.Value >= i;
-            <button type="submit" name="rating" value="@i"
-                    class="btn btn-link p-0 m-0" style="box-shadow: none; outline: none;">
-                <i class="bi @(isFilled ? "bi-star-fill text-warning" : "bi-star text-warning") fs-4"></i>
-            </button>
-        }
-    </form>
-
-    <br /><br />
-
-    <h4>Comments</h4>
-    <ul class="list-group mb-3">
-        @foreach (var comment in Model.Comments)
-        {
-            <li class="list-group-item">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>@comment.User.Name:</strong> @comment.Content
-                    </div>
-                    <div>
-                        @if (ViewBag.CurrentUserId == comment.UserId)
-                        {
-                            <!-- Edit Comment Button -->
-                            <button type="button" class="btn btn-warning btn-sm me-1"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editCommentModal-@comment.Id">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-
-                            <!-- Edit Comment -->
-                            <div class="modal fade" id="editCommentModal-@comment.Id" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <form asp-action="EditComment" method="post">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Edit Comment</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <input type="hidden" name="id" value="@comment.Id" />
-                                                <input type="hidden" name="postId" value="@Model.Id" />
-                                                <textarea name="content" class="form-control" required>@comment.Content</textarea>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-primary">Save changes</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-
-                        @if (ViewBag.CurrentUserId == comment.UserId || User.IsInRole("Admin"))
-                        {
-                            <!-- Delete -->
-                            <form asp-action="DeleteComment" method="post" class="d-inline">
-                                <input type="hidden" name="id" value="@comment.Id" />
-                                <input type="hidden" name="postId" value="@Model.Id" />
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Are you sure you want to delete this comment?');">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                            </form>
-
-                        }
-                    </div>
-                </div>
-            </li>
-        }
-
-    </ul>
-
-    <!-- Add Comment -->
-    <form asp-action="AddComment" method="post">
-        <input type="hidden" name="postId" value="@Model.Id" />
-        <textarea name="content" class="form-control mb-2" placeholder="Add a comment..." required></textarea>
-        <button type="submit" class="btn btn-primary btn-sm">Comment</button>
-    </form>
 </div>
 
 <!-- Delete Confirmation Modal -->
 @if (ViewBag.CurrentUserId != null && Model.UserId == ViewBag.CurrentUserId)
 {
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow-lg border-0">
+                <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to delete this post?</p>
                     <p><strong>Title:</strong> @Model.Title</p>
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <strong>Warning:</strong> This action cannot be undone. All comments, likes, and ratings associated with this post will also be deleted.
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <div>
+                            <strong>Warning:</strong> This action cannot be undone. All comments, likes, and ratings will also be deleted.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Cancel</button>
                     <form asp-controller="Posts" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-danger">Delete Post</button>
+                        <button type="submit" class="btn btn-danger fw-bold">Delete Post</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+}
+
+@section Scripts {
+<script>
+    // Star hover effect
+    document.querySelectorAll('.star-btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            const siblings = Array.from(btn.parentElement.children);
+            siblings.forEach(s => {
+                const starIcon = s.querySelector('i');
+                if (s === btn || siblings.indexOf(s) < siblings.indexOf(btn)) {
+                    starIcon.classList.remove('bi-star');
+                    starIcon.classList.add('bi-star-fill');
+                } else {
+                    starIcon.classList.remove('bi-star-fill');
+                    starIcon.classList.add('bi-star');
+                }
+            });
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            const siblings = Array.from(btn.parentElement.children);
+            siblings.forEach((s, index) => {
+                const starIcon = s.querySelector('i');
+                const currentRating = @Model.Ratings.FirstOrDefault(r => r.UserId == ViewBag.CurrentUserId)?.Value ?? 0;
+                if (index < currentRating) {
+                    starIcon.classList.remove('bi-star');
+                    starIcon.classList.add('bi-star-fill');
+                } else {
+                    starIcon.classList.remove('bi-star-fill');
+                    starIcon.classList.add('bi-star');
+                }
+            });
+        });
+    });
+
+    // Like button pop effect
+    const likeBtn = document.getElementById('like-btn');
+    likeBtn.addEventListener('click', () => {
+        likeBtn.style.transform = 'scale(1.3)';
+        setTimeout(() => likeBtn.style.transform = 'scale(1)', 150);
+    });
+</script>
 }
