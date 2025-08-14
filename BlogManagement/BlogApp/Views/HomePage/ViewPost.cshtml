@@ -24,7 +24,11 @@
         <span class="text-muted ms-2">by @Model.User.Name on @Model.CreateDate.ToString("MMM dd, yyyy")</span>
     </div>
 
-
+    @{
+        // Get current user ID
+        var currentUserIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        int? currentUserId = currentUserIdClaim != null ? int.Parse(currentUserIdClaim) : (int?)null;
+    }
     <!-- Author Info -->
     <div class="d-flex align-items-center mb-3 p-3 bg-light rounded shadow-sm">
         @if (!string.IsNullOrEmpty(Model.User.ImageURL) || Model.User.ProfileImage != null)
@@ -43,7 +47,13 @@
         }
 
         <div>
-            <h5 class="mb-0 text-primary fw-bold">@Model.User.Name</h5>
+            <h5 class="mb-0 text-primary fw-bold">
+                @Model.User.Name
+                @if (currentUserId.HasValue && currentUserId.Value == Model.User.Id)
+                {
+                    <span class="text-secondary fw-normal"> (You)</span>
+                }
+            </h5>
             <small class="text-muted">
                 @Model.User.Role.ToString()
                 @if (Model.User.Country != null)
@@ -106,7 +116,16 @@
             <li class="list-group-item">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <strong>@comment.User.Name:</strong> @comment.Content
+                        <strong>
+                            @if (ViewBag.CurrentUserId == comment.UserId)
+                            {
+                                @comment.User.Name <span class="fw-normal text-secondary">(You)</span>
+                             }
+                            else
+                            {
+                                @comment.User.Name
+                            }
+                        </strong>: @comment.Content
                     </div>
                     <div>
                         @if (ViewBag.CurrentUserId == comment.UserId)
@@ -142,7 +161,7 @@
                             </div>
                         }
 
-                        @if (ViewBag.CurrentUserId == comment.UserId || User.IsInRole("Admin"))
+                        @if (ViewBag.CurrentUserId == comment.UserId || User.IsInRole("Admin") || ViewBag.CurrentUserId == Model.UserId)
                         {
                             <!-- Delete -->
                             <form asp-action="DeleteComment" method="post" class="d-inline">
