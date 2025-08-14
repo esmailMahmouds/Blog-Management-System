@@ -16,6 +16,8 @@ namespace BlogApp.UnitOfWork.Implementation
 
         private ICountryRepository _countryRepository;
 
+        private IFollowRepository _followRepository;
+
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -44,8 +46,16 @@ namespace BlogApp.UnitOfWork.Implementation
             {
                 return _countryRepository ??= new CountryRepository(_context);
             }
-        } 
-        public async Task<int> Save()
+        }
+
+		public IFollowRepository FollowRepository
+		{
+			get
+			{
+				return _followRepository ??= new FollowRepository(_context);
+			}
+		}
+		public async Task<int> Save()
         {
             return await _context.SaveChangesAsync();
         }

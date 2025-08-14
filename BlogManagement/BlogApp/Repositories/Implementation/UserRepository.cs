@@ -34,5 +34,13 @@ namespace BlogApp.Repositories.Implementation
             var entityEntry =  _context.Users.Update(user);
             return entityEntry.Entity;
         }
+
+        public async Task<User?> GetUserByIdWithFollow(int id)
+        {
+            return await _context.Users.AsNoTracking()
+                .Include(u => u.Followers)
+                .Include(u => u.Followings)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
     }
 }
