@@ -48,6 +48,33 @@ namespace BlogApp.Services.Implementation
             await _unitOfWork.Save();
             return true;
         }
+        public async Task<bool> EditComment(int commentId, string newContent, int userId, bool isAdmin)
+        {
+            var comment = await _unitOfWork.PostRepository.GetCommentById(commentId);
+            if (comment == null) return false;
+
+            // Rule: User can edit their own, Admins can edit only their own
+            if (comment.UserId != userId && comment.Post.UserId != userId) return false;
+
+            comment.Content = newContent;
+            comment.CreateDate = DateTime.UtcNow;
+
+            await _unitOfWork.PostRepository.UpdateComment(comment);
+            await _unitOfWork.Save();
+            return true;
+        }
+        public async Task<bool> DeleteComment(int commentId, int userId, bool isAdmin)
+        {
+            var comment = await _unitOfWork.PostRepository.GetCommentById(commentId);
+            if (comment == null) return false;
+
+            // Rule: User deletes own, Admin can delete any
+            if (comment.UserId != userId && !isAdmin) return false;
+
+            await _unitOfWork.PostRepository.DeleteComment(comment);
+            await _unitOfWork.Save();
+            return true;
+        }
 
     }
 }

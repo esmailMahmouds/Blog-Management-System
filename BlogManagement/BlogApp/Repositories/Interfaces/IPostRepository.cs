@@ -1,4 +1,5 @@
 ﻿using BlogApp.Models.DomainClasses;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Repositories.Interfaces
 {
@@ -9,6 +10,10 @@ namespace BlogApp.Repositories.Interfaces
         Task<bool> AddLike(int postId, int userId);
         Task<bool> AddRating(int postId, int userId, double rating);
         Task<bool> AddComment(int postId, int userId, string content);
+        Task<Comment> GetCommentById(int id);
+        Task UpdateComment(Comment comment);
+        Task DeleteComment(Comment comment);
+
 
     }
 }
