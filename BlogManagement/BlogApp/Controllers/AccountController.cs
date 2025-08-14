@@ -1,4 +1,5 @@
 using BlogApp.Context;
+using BlogApp.Enums;
 using BlogApp.Models.Dtos;
 using BlogApp.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -11,12 +12,14 @@ namespace BlogApp.Controllers
         private readonly IAuthService _authService;
         private readonly ILogger<AccountController> _logger;
         private readonly ApplicationDbContext _context; //change when countries logic is implemented
+        private readonly IJwtService _jwtService;
 
-        public AccountController(IAuthService authService, ILogger<AccountController> logger, ApplicationDbContext context)
+        public AccountController(IAuthService authService, ILogger<AccountController> logger, ApplicationDbContext context, IJwtService jwtService)
         {
             _authService = authService;
             _logger = logger;
             _context = context; //change when countries logic is implemented
+            _jwtService = jwtService;
         }
 
         [HttpGet]
@@ -66,7 +69,6 @@ namespace BlogApp.Controllers
 
             if (result.Success)
             {
-                //for simplicity, just redirect to home but in a real app, you'd set up authentication cookies
                 TempData["SuccessMessage"] = "Sign in successful!";
 
                 var cookieOptions = new CookieOptions
@@ -76,6 +78,22 @@ namespace BlogApp.Controllers
                 };
                 Response.Cookies.Append("Jwt", result.Data?.AccessToken ?? "", cookieOptions);
 
+                //check user role and redirect accordingly
+                try
+                {
+                    var userRole = _jwtService.GetUserRoleFromToken(result.Data?.AccessToken ?? "");
+                    if (userRole == Role.Admin)
+                    {
+                        TempData["SuccessMessage"] = "Welcome back, Admin!";
+                        return RedirectToAction("Dashboard", "Admin");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("Failed to get user role from token: {Error}", ex.Message);
+                }
+
+                // Default redirect for regular users
                 return RedirectToAction("PostsDisplay", "HomePage");
             }
 

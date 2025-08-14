@@ -1,10 +1,12 @@
 using BlogApp.Enums;
 using BlogApp.Models.Dtos;
 using BlogApp.Services.Interfaces;
+using BlogApp.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.Controllers
 {
+    [AdminAuthorize]
     public class AdminController : Controller
     {
         private readonly IPostService _postService;
@@ -18,171 +20,192 @@ namespace BlogApp.Controllers
             _jwtService = jwtService;
         }
 
-        private bool IsAdmin()
+        public async Task<IActionResult> Dashboard()
         {
-            Request.Cookies.TryGetValue("Jwt", out string? jwtToken);
-            if (string.IsNullOrEmpty(jwtToken))
-                return false;
-
             try
             {
-                Role userRole = _jwtService.GetUserRoleFromToken(jwtToken);
-                return userRole == Role.Admin;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+                // Get dashboard statistics
+                var pendingPosts = await _postService.GetPendingPosts();
+                var allPosts = await _postService.GetAllPostsForAdmin();
+                var allUsers = await _userService.GetAllUsers();
 
-        public IActionResult Dashboard()
-        {
-            if (!IsAdmin())
-            {
-                TempData["ErrorMessage"] = "Access denied. Admin privileges required.";
-                return RedirectToAction("Index", "Home");
-            }
+                ViewBag.PendingPostsCount = pendingPosts.Count();
+                ViewBag.TotalPostsCount = allPosts.Count();
+                ViewBag.TotalUsersCount = allUsers.Count();
+                ViewBag.ApprovedPostsCount = allPosts.Count(p => p.Status == PostStatus.Approved);
 
-            return View();
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading dashboard data: " + ex.Message;
+                return View();
+            }
         }
 
         public async Task<IActionResult> PendingPosts()
         {
-            if (!IsAdmin())
+            try
             {
-                TempData["ErrorMessage"] = "Access denied. Admin privileges required.";
-                return RedirectToAction("Index", "Home");
+                var pendingPosts = await _postService.GetPendingPosts();
+                return View(pendingPosts);
             }
-
-            var pendingPosts = await _postService.GetPendingPosts();
-            return View(pendingPosts);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading pending posts: " + ex.Message;
+                return View(new List<BlogApp.Models.DomainClasses.Post>());
+            }
         }
 
         public async Task<IActionResult> AllPosts()
         {
-            if (!IsAdmin())
+            try
             {
-                TempData["ErrorMessage"] = "Access denied. Admin privileges required.";
-                return RedirectToAction("Index", "Home");
+                var allPosts = await _postService.GetAllPostsForAdmin();
+                return View(allPosts);
             }
-
-            var allPosts = await _postService.GetAllPostsForAdmin();
-            return View(allPosts);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading posts: " + ex.Message;
+                return View(new List<BlogApp.Models.DomainClasses.Post>());
+            }
         }
 
         public async Task<IActionResult> ManageUsers()
         {
-            if (!IsAdmin())
+            try
             {
-                TempData["ErrorMessage"] = "Access denied. Admin privileges required.";
-                return RedirectToAction("Index", "Home");
+                var users = await _userService.GetAllUsers();
+                return View(users);
             }
-
-            var users = await _userService.GetAllUsers();
-            return View(users);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading users: " + ex.Message;
+                return View(new List<BlogApp.Models.DomainClasses.User>());
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApprovePost([FromBody] AdminPostActionDto request)
         {
-            if (!IsAdmin())
+            try
             {
-                return Json(new { success = false, message = "Access denied." });
-            }
+                if (request.Id <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid post ID." });
+                }
 
-            if (request.Id <= 0)
+                var approved = await _postService.ApprovePost(request.Id);
+                if (approved)
+                {
+                    return Json(new { success = true, message = "Post approved successfully." });
+                }
+
+                return Json(new { success = false, message = "Failed to approve post." });
+            }
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Invalid post ID." });
+                return Json(new { success = false, message = "Error approving post: " + ex.Message });
             }
-
-            var approved = await _postService.ApprovePost(request.Id);
-            if (approved)
-            {
-                return Json(new { success = true, message = "Post approved successfully." });
-            }
-
-            return Json(new { success = false, message = "Failed to approve post." });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectPost([FromBody] AdminPostActionDto request)
         {
-            if (!IsAdmin())
+            try
             {
-                return Json(new { success = false, message = "Access denied." });
-            }
+                if (request.Id <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid post ID." });
+                }
 
-            if (request.Id <= 0)
+                var rejected = await _postService.RejectPost(request.Id);
+                if (rejected)
+                {
+                    return Json(new { success = true, message = "Post rejected successfully." });
+                }
+
+                return Json(new { success = false, message = "Failed to reject post." });
+            }
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Invalid post ID." });
+                return Json(new { success = false, message = "Error rejecting post: " + ex.Message });
             }
-
-            var rejected = await _postService.RejectPost(request.Id);
-            if (rejected)
-            {
-                return Json(new { success = true, message = "Post rejected successfully." });
-            }
-
-            return Json(new { success = false, message = "Failed to reject post." });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePost([FromBody] AdminPostActionDto request)
         {
-            if (!IsAdmin())
+            try
             {
-                return Json(new { success = false, message = "Access denied." });
-            }
+                if (request.Id <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid post ID." });
+                }
 
-            if (request.Id <= 0)
+                var deleted = await _postService.AdminDeletePost(request.Id);
+                if (deleted)
+                {
+                    return Json(new { success = true, message = "Post deleted successfully." });
+                }
+
+                return Json(new { success = false, message = "Failed to delete post." });
+            }
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Invalid post ID." });
+                return Json(new { success = false, message = "Error deleting post: " + ex.Message });
             }
-
-            var deleted = await _postService.AdminDeletePost(request.Id);
-            if (deleted)
-            {
-                TempData["SuccessMessage"] = "Post deleted successfully.";
-                return Json(new { success = true, message = "Post deleted successfully." });
-            }
-
-            return Json(new { success = false, message = "Failed to delete post." });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUser([FromBody] AdminPostActionDto request)
+        public async Task<IActionResult> DeleteUser([FromBody] AdminUserActionDto request)
         {
-            if (!IsAdmin())
+            try
             {
-                return Json(new { success = false, message = "Access denied." });
-            }
+                if (request.Id <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid user ID." });
+                }
 
-            if (request.Id <= 0)
+                // Prevent admin from deleting themselves
+                var currentUserId = GetCurrentUserId();
+                if (request.Id == currentUserId)
+                {
+                    return Json(new { success = false, message = "You cannot delete your own account." });
+                }
+
+                var deleted = await _userService.DeleteUser(request.Id);
+                if (deleted)
+                {
+                    return Json(new { success = true, message = "User deleted successfully." });
+                }
+
+                return Json(new { success = false, message = "Failed to delete user." });
+            }
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Invalid user ID." });
+                return Json(new { success = false, message = "Error deleting user: " + ex.Message });
             }
+        }
 
-            // Get current admin ID to prevent self-deletion
+        private int GetCurrentUserId()
+        {
             Request.Cookies.TryGetValue("Jwt", out string? jwtToken);
-            var currentUserId = _jwtService.GetUserIdFromToken(jwtToken);
+            if (string.IsNullOrEmpty(jwtToken))
+                throw new UnauthorizedAccessException("User not authenticated");
 
-            if (currentUserId == request.Id)
+            try
             {
-                return Json(new { success = false, message = "Cannot delete your own account." });
+                return _jwtService.GetUserIdFromToken(jwtToken);
             }
-
-            var deleted = await _userService.DeleteUser(request.Id);
-            if (deleted)
+            catch
             {
-                TempData["SuccessMessage"] = "User deleted successfully.";
-                return Json(new { success = true, message = "User deleted successfully." });
+                throw new UnauthorizedAccessException("Invalid authentication token");
             }
-
-            return Json(new { success = false, message = "Failed to delete user." });
         }
     }
 }

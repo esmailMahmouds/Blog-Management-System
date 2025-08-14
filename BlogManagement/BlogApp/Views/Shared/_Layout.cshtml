@@ -60,9 +60,6 @@
                                     </a></li>
                                 </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="Create">Create Post</a>
-                            </li>
                         }
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">
@@ -141,12 +138,19 @@
                     // Decode JWT payload (simple base64 decode)
                     const payload = JSON.parse(atob(jwtToken.split('.')[1]));
                     const userRole = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+                    const userName = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
                     
                     // Show admin menu if user is admin
                     if (userRole === 'Admin') {
                         const adminMenu = document.getElementById('adminMenu');
                         if (adminMenu) {
                             adminMenu.style.display = 'block';
+                        }
+
+                        // Add admin badge to user name in navigation if exists
+                        const profileLink = document.querySelector('a[href*="Profile"]');
+                        if (profileLink) {
+                            profileLink.innerHTML = '<i class="fas fa-user-shield text-warning"></i> ' + userName + ' (Admin)';
                         }
                     }
                 } catch (error) {
