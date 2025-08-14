@@ -1,4 +1,5 @@
-﻿using BlogApp.Models.DomainClasses;
+﻿using BlogApp.Enums;
+using BlogApp.Models.DomainClasses;
 using BlogApp.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -69,6 +70,22 @@ namespace BlogApp.Services.Implementation
                 throw new ArgumentException("Invalid token or user ID claim not found");
             }
             return userId;
+        }
+
+        public Role GetUserRoleFromToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new ArgumentException("Token cannot be null or empty");
+            }
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+            if (roleClaim == null || !Enum.TryParse<Role>(roleClaim.Value, out Role role))
+            {
+                throw new ArgumentException("Invalid token or role claim not found");
+            }
+            return role;
         }
     }
 }

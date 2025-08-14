@@ -3,15 +3,40 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome to BlogApp</h1>
-    <p class="lead">Your platform for sharing thoughts and connecting with others.</p>
+    <h1 class="display-4">Welcome Back to BlogApp!</h1>
+    <p class="lead">Ready to dive into the latest posts and share your thoughts?</p>
     
     <div class="mt-4">
-        <a asp-controller="Account" asp-action="SignUp" class="btn btn-primary btn-lg me-3">Get Started - Sign Up</a>
-        <a asp-controller="Account" asp-action="SignIn" class="btn btn-outline-primary btn-lg">Already have an account? Sign In</a>
+        <a asp-controller="HomePage" asp-action="PostsDisplay" class="btn btn-primary btn-lg me-3">
+            <i class="fas fa-newspaper"></i> View Posts
+        </a>
+        <a asp-controller="Posts" asp-action="Create" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-plus"></i> Create New Post
+        </a>
     </div>
     
     <hr class="my-5" />
     
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-newspaper fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Latest Posts</h5>
+                    <p class="card-text">Discover the newest content from our community of writers.</p>
+                    <a asp-controller="HomePage" asp-action="PostsDisplay" class="btn btn-primary">Browse Posts</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-user fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Your Profile</h5>
+                    <p class="card-text">Manage your account settings and view your activity.</p>
+                    <a asp-controller="Profile" asp-action="Index" class="btn btn-success">View Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -1,0 +1,162 @@
+@model IEnumerable<BlogApp.Models.DomainClasses.Post>
+@{
+    ViewData["Title"] = "All Posts";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-newspaper"></i> All Posts</h1>
+        <a asp-action="Dashboard" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-3" id="statusTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">
+                All Posts (@Model.Count())
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button">
+                Approved (@Model.Count(p => p.Status == BlogApp.Enums.PostStatus.Approved))
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button">
+                Pending (@Model.Count(p => p.Status == BlogApp.Enums.PostStatus.Pending))
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button">
+                Rejected (@Model.Count(p => p.Status == BlogApp.Enums.PostStatus.Rejected))
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="statusTabsContent">
+        <!-- All Posts Tab -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            @await Html.PartialAsync("_PostsTable", Model)
+        </div>
+        
+        <!-- Approved Posts Tab -->
+        <div class="tab-pane fade" id="approved" role="tabpanel">
+            @await Html.PartialAsync("_PostsTable", Model.Where(p => p.Status == BlogApp.Enums.PostStatus.Approved))
+        </div>
+        
+        <!-- Pending Posts Tab -->
+        <div class="tab-pane fade" id="pending" role="tabpanel">
+            @await Html.PartialAsync("_PostsTable", Model.Where(p => p.Status == BlogApp.Enums.PostStatus.Pending))
+        </div>
+        
+        <!-- Rejected Posts Tab -->
+        <div class="tab-pane fade" id="rejected" role="tabpanel">
+            @await Html.PartialAsync("_PostsTable", Model.Where(p => p.Status == BlogApp.Enums.PostStatus.Rejected))
+        </div>
+    </div>
+</div>
+
+<!-- Toast for notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showToast(message, isSuccess = true) {
+            const toastElement = document.getElementById('notificationToast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastHeader = toastElement.querySelector('.toast-header');
+            
+            toastMessage.textContent = message;
+            
+            toastHeader.classList.remove('bg-success', 'bg-danger', 'text-white');
+            if (isSuccess) {
+                toastHeader.classList.add('bg-success', 'text-white');
+            } else {
+                toastHeader.classList.add('bg-danger', 'text-white');
+            }
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        function approvePost(postId) {
+            if (confirm('Are you sure you want to approve this post?')) {
+                fetch('@Url.Action("ApprovePost", "Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ id: postId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, true);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast(data.message, false);
+                    }
+                });
+            }
+        }
+
+        function rejectPost(postId) {
+            if (confirm('Are you sure you want to reject this post?')) {
+                fetch('@Url.Action("RejectPost", "Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ id: postId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, true);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast(data.message, false);
+                    }
+                });
+            }
+        }
+
+        function deletePost(postId) {
+            if (confirm('Are you sure you want to delete this post? This action cannot be undone and will remove all associated comments, likes, and ratings.')) {
+                fetch('@Url.Action("DeletePost", "Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ id: postId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, true);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast(data.message, false);
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+@Html.AntiForgeryToken()

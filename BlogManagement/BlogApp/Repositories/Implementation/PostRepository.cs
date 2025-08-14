@@ -14,18 +14,42 @@ namespace BlogApp.Repositories.Implementation
         {
             _context = context;
         }
-        public async Task<IEnumerable<Post>> GetAllPosts()
+
+        public async Task<(IEnumerable<Post>, int)> GetAllPosts(int page, int pageSize)
         {
-            return await _context.Posts
+            if (page < 1) page = 1;
+
+            var totalCount = await _context.Posts
+                .Where(p => p.Status == PostStatus.Approved)
+                .CountAsync();
+
+            var posts = await _context.Posts
                 .Where(p => p.Status == PostStatus.Approved)
                 .Include(p => p.User)
                 .Include(p => p.Category)
-                .Include(p => p.Comments)
-                .Include(p => p.Ratings)
-                .Include(p => p.Likes)
                 .OrderByDescending(p => p.CreateDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new Post
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    CreateDate = p.CreateDate,
+                    LikeCount = p.LikeCount,
+                    AverageRate = p.AverageRate,
+                    RateCount = p.RateCount,
+                    Status = p.Status,
+                    UserId = p.UserId,
+                    CategoryId = p.CategoryId,
+                    User = new User { Id = p.User.Id, Name = p.User.Name, ImageURL = p.User.ImageURL, ProfileImage = p.User.ProfileImage },
+                    Category = new Category { Id = p.Category.Id, Name = p.Category.Name }
+                })
                 .ToListAsync();
+
+            return (posts, totalCount);
         }
+
         public async Task<Post?> GetPostById(int id)
         {
             return await _context.Posts
@@ -34,6 +58,7 @@ namespace BlogApp.Repositories.Implementation
                 .Include(p => p.Comments).ThenInclude(c => c.User)
                 .Include(p => p.Ratings)
                 .Include(p => p.Likes)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
         public async Task<bool> AddLike(int postId, int userId)
@@ -104,6 +129,199 @@ namespace BlogApp.Repositories.Implementation
             });
 
             return true;
+        }
+
+        public async Task<Post> CreatePostAsync(Post post)
+        {
+            await _context.Posts.AddAsync(post);
+            return post;
+        }
+
+        public async Task<bool> UpdatePostAsync(Post post)
+        {
+            var existingPost = await _context.Posts.FirstOrDefaultAsync(p => p.Id == post.Id);
+            if (existingPost == null)
+                return false;
+
+            existingPost.Title = post.Title;
+            existingPost.Content = post.Content;
+            existingPost.CategoryId = post.CategoryId;
+            existingPost.Status = PostStatus.Pending;
+
+            _context.Posts.Update(existingPost);
+            return true;
+        }
+
+        public async Task<bool> DeletePostAsync(int postId)
+        {
+            var post = await _context.Posts
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .Include(p => p.Ratings)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return false;
+
+            if (post.Comments?.Any() == true)
+            {
+                _context.Comments.RemoveRange(post.Comments);
+            }
+
+            if (post.Likes?.Any() == true)
+            {
+                _context.Likes.RemoveRange(post.Likes);
+            }
+
+            if (post.Ratings?.Any() == true)
+            {
+                _context.Ratings.RemoveRange(post.Ratings);
+            }
+
+            _context.Posts.Remove(post);
+            return true;
+        }
+
+        //admin specific methods - optimized for performance
+        public async Task<IEnumerable<Post>> GetAllPostsIncludingPending()
+        {
+            return await _context.Posts
+                .AsNoTracking()
+                .Include(p => p.User)
+                .Include(p => p.Category)
+                .OrderByDescending(p => p.CreateDate)
+                .Select(p => new Post
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content.Length > 150 ? p.Content.Substring(0, 150) + "..." : p.Content,
+                    CreateDate = p.CreateDate,
+                    LikeCount = p.LikeCount,
+                    AverageRate = p.AverageRate,
+                    RateCount = p.RateCount,
+                    Status = p.Status,
+                    UserId = p.UserId,
+                    CategoryId = p.CategoryId,
+                    User = new User { Id = p.User.Id, Name = p.User.Name },
+                    Category = new Category { Id = p.Category.Id, Name = p.Category.Name }
+                })
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Post>> GetPendingPosts()
+        {
+            return await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.Status == PostStatus.Pending)
+                .Include(p => p.User)
+                .Include(p => p.Category)
+                .OrderByDescending(p => p.CreateDate)
+                .Select(p => new Post
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content.Length > 150 ? p.Content.Substring(0, 150) + "..." : p.Content,
+                    CreateDate = p.CreateDate,
+                    LikeCount = p.LikeCount,
+                    AverageRate = p.AverageRate,
+                    RateCount = p.RateCount,
+                    Status = p.Status,
+                    UserId = p.UserId,
+                    CategoryId = p.CategoryId,
+                    User = new User { Id = p.User.Id, Name = p.User.Name },
+                    Category = new Category { Id = p.Category.Id, Name = p.Category.Name }
+                })
+                .ToListAsync();
+        }
+
+        public async Task<bool> ApprovePost(int postId)
+        {
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if (post == null)
+                return false;
+
+            post.Status = PostStatus.Approved;
+            _context.Posts.Update(post);
+            return true;
+        }
+
+        public async Task<bool> RejectPost(int postId)
+        {
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if (post == null)
+                return false;
+
+            post.Status = PostStatus.Rejected;
+            _context.Posts.Update(post);
+            return true;
+        }
+
+        public async Task<bool> AdminDeletePost(int postId)
+        {
+            var post = await _context.Posts
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .Include(p => p.Ratings)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return false;
+
+            if (post.Comments?.Any() == true)
+            {
+                _context.Comments.RemoveRange(post.Comments);
+            }
+
+            if (post.Likes?.Any() == true)
+            {
+                _context.Likes.RemoveRange(post.Likes);
+            }
+
+            if (post.Ratings?.Any() == true)
+            {
+                _context.Ratings.RemoveRange(post.Ratings);
+            }
+
+            _context.Posts.Remove(post);
+            return true;
+        }
+
+
+        public async Task<int> GetPendingPostsCount()
+        {
+            return await _context.Posts
+                .Where(p => p.Status == PostStatus.Pending)
+                .CountAsync();
+        }
+
+        public async Task<int> GetTotalPostsCount()
+        {
+            return await _context.Posts.CountAsync();
+        }
+
+        public async Task<int> GetApprovedPostsCount()
+        {
+            return await _context.Posts
+                .Where(p => p.Status == PostStatus.Approved)
+                .CountAsync();
+        }
+
+        public async Task<Comment?> GetCommentById(int id)
+        {
+            return await _context.Comments
+                .Include(c => c.User)
+                .Include(c => c.Post)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+        public async Task UpdateComment(Comment comment)
+        {
+            _context.Comments.Update(comment);
+
+        }
+        public async Task DeleteComment(Comment comment)
+        {
+            _context.Comments.Remove(comment);
+
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BlogApp.Models.DomainClasses;
+using BlogApp.Enums;
 
 namespace BlogApp.Services.Interfaces
 {
@@ -6,5 +7,6 @@ namespace BlogApp.Services.Interfaces
     {
         string GenerateToken(User user);
         int GetUserIdFromToken(string token);
+        Role GetUserRoleFromToken(string token);
     }
 }

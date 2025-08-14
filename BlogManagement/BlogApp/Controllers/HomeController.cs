@@ -1,9 +1,11 @@
+using BlogApp.Filters;
 using BlogApp.Models.DomainClasses;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace BlogApp.Controllers
 {
+    [UserAuthorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
