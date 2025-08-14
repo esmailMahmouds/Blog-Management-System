@@ -30,7 +30,7 @@ namespace BlogApp.Controllers
             if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
             {
                 var userId = _jwtService.GetUserIdFromToken(jwtToken);
-                currentUser = await _profileService.GetCurrentUserWithFollow(userId);
+                currentUser = await _profileService.GetCurrentUser(userId);
             }
 
             if (currentUser != null)
