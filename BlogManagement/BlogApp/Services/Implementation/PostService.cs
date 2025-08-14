@@ -13,9 +13,9 @@ namespace BlogApp.Services.Implementation
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<Post>> GetAllPosts()
+        public async Task<(IEnumerable<Post> Posts, int TotalCount)> GetAllPosts(int page, int pageSize)
         {
-            return await _unitOfWork.PostRepository.GetAllPosts();
+            return await _unitOfWork.PostRepository.GetAllPosts(page, pageSize);
         }
         public async Task<Post?> GetPostById(int id)
         {
@@ -45,6 +45,33 @@ namespace BlogApp.Services.Implementation
             var comment = await _unitOfWork.PostRepository.AddComment(postId, userId, content);
             if (!comment) return false;
 
+            await _unitOfWork.Save();
+            return true;
+        }
+        public async Task<bool> EditComment(int commentId, string newContent, int userId, bool isAdmin)
+        {
+            var comment = await _unitOfWork.PostRepository.GetCommentById(commentId);
+            if (comment == null) return false;
+
+            // Rule: User can edit their own, Admins can edit only their own
+            if (comment.UserId != userId && comment.Post.UserId != userId) return false;
+
+            comment.Content = newContent;
+            comment.CreateDate = DateTime.UtcNow;
+
+            await _unitOfWork.PostRepository.UpdateComment(comment);
+            await _unitOfWork.Save();
+            return true;
+        }
+        public async Task<bool> DeleteComment(int commentId, int userId, bool isAdmin)
+        {
+            var comment = await _unitOfWork.PostRepository.GetCommentById(commentId);
+            if (comment == null) return false;
+
+            // Rule: User deletes own, Admin can delete any
+            if (comment.UserId != userId && !isAdmin) return false;
+
+            await _unitOfWork.PostRepository.DeleteComment(comment);
             await _unitOfWork.Save();
             return true;
         }
