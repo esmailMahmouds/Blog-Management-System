@@ -47,71 +47,32 @@ namespace BlogApp.Repositories.Implementation
 
         public async Task<bool> DeleteUser(int userId)
         {
-            var user = await _context.Users
-                .Include(u => u.Comments)
-                .Include(u => u.Ratings)
-                .Include(u => u.Likes)
-                .Include(u => u.Followers)
-                .Include(u => u.Followings)
-                .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (user == null)
-                return false;
+            await _context.Comments.Where(c => c.UserId == userId).ExecuteDeleteAsync();
+            await _context.Ratings.Where(r => r.UserId == userId).ExecuteDeleteAsync();
+            await _context.Likes.Where(l => l.UserId == userId).ExecuteDeleteAsync();
+            await _context.Follows.Where(f => f.FollowerUserId == userId || f.FollowingUserId == userId).ExecuteDeleteAsync();
 
-            if (user.Comments?.Any() == true)
+
+            var userPostIds = await _context.Posts.Where(p => p.UserId == userId).Select(p => p.Id).ToListAsync();
+
+            if (userPostIds.Any())
             {
-                _context.Comments.RemoveRange(user.Comments);
-            }
-
-            if (user.Ratings?.Any() == true)
-            {
-                _context.Ratings.RemoveRange(user.Ratings);
-            }
-
-            if (user.Likes?.Any() == true)
-            {
-                _context.Likes.RemoveRange(user.Likes);
-            }
-
-            if (user.Followers?.Any() == true)
-            {
-                _context.Follows.RemoveRange(user.Followers);
-            }
-
-            if (user.Followings?.Any() == true)
-            {
-                _context.Follows.RemoveRange(user.Followings);
+                await _context.Comments.Where(c => userPostIds.Contains(c.PostId)).ExecuteDeleteAsync();
+                await _context.Ratings.Where(r => userPostIds.Contains(r.PostId)).ExecuteDeleteAsync();
+                await _context.Likes.Where(l => userPostIds.Contains(l.PostId)).ExecuteDeleteAsync();
+                await _context.Posts.Where(p => userPostIds.Contains(p.Id)).ExecuteDeleteAsync();
             }
 
 
-            var userPosts = await _context.Posts
-                .Include(p => p.Comments)
-                .Include(p => p.Ratings)
-                .Include(p => p.Likes)
-                .Where(p => p.UserId == userId)
-                .ToListAsync();
+            var result = await _context.Users.Where(u => u.Id == userId).ExecuteDeleteAsync();
+            return result > 0;
+        }
 
-            foreach (var post in userPosts)
-            {
-                if (post.Comments?.Any() == true)
-                {
-                    _context.Comments.RemoveRange(post.Comments);
-                }
 
-                if (post.Ratings?.Any() == true)
-                {
-                    _context.Ratings.RemoveRange(post.Ratings);
-                }
-
-                if (post.Likes?.Any() == true)
-                {
-                    _context.Likes.RemoveRange(post.Likes);
-                }
-            }
-
-            _context.Posts.RemoveRange(userPosts);
-            _context.Users.Remove(user);
-            return true;
+        public async Task<int> GetTotalUsersCount()
+        {
+            return await _context.Users.CountAsync();
         }
     }
 }

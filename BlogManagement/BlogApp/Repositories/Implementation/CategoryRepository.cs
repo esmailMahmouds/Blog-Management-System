@@ -16,12 +16,17 @@ namespace BlogApp.Repositories.Implementation
 
         public async Task<IEnumerable<Category>> GetAllCategories()
         {
-            return await _context.Categories.ToListAsync();
+            return await _context.Categories
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .ToListAsync();
         }
 
         public async Task<Category?> GetCategoryById(int id)
         {
-            return await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Categories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
     }
 }

@@ -14,23 +14,42 @@ namespace BlogApp.Repositories.Implementation
         {
             _context = context;
         }
+
         public async Task<(IEnumerable<Post>, int)> GetAllPosts(int page, int pageSize)
         {
             if (page < 1) page = 1;
-            var query = _context.Posts
+
+            var totalCount = await _context.Posts
+                .Where(p => p.Status == PostStatus.Approved)
+                .CountAsync();
+
+            var posts = await _context.Posts
                 .Where(p => p.Status == PostStatus.Approved)
                 .Include(p => p.User)
                 .Include(p => p.Category)
-                .Include(p => p.Comments)
-                .Include(p => p.Ratings)
-                .Include(p => p.Likes)
-                .OrderByDescending(p => p.CreateDate);
-
-            var totalCount = await query.CountAsync();
-            var posts = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+                .OrderByDescending(p => p.CreateDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new Post
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    CreateDate = p.CreateDate,
+                    LikeCount = p.LikeCount,
+                    AverageRate = p.AverageRate,
+                    RateCount = p.RateCount,
+                    Status = p.Status,
+                    UserId = p.UserId,
+                    CategoryId = p.CategoryId,
+                    User = new User { Id = p.User.Id, Name = p.User.Name, ImageURL = p.User.ImageURL, ProfileImage = p.User.ProfileImage },
+                    Category = new Category { Id = p.Category.Id, Name = p.Category.Name }
+                })
+                .ToListAsync();
 
             return (posts, totalCount);
         }
+
         public async Task<Post?> GetPostById(int id)
         {
             return await _context.Posts
@@ -39,6 +58,7 @@ namespace BlogApp.Repositories.Implementation
                 .Include(p => p.Comments).ThenInclude(c => c.User)
                 .Include(p => p.Ratings)
                 .Include(p => p.Likes)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
         public async Task<bool> AddLike(int postId, int userId)
@@ -162,17 +182,29 @@ namespace BlogApp.Repositories.Implementation
             return true;
         }
 
-        //admin specific methods
+        //admin specific methods - optimized for performance
         public async Task<IEnumerable<Post>> GetAllPostsIncludingPending()
         {
             return await _context.Posts
                 .AsNoTracking()
                 .Include(p => p.User)
                 .Include(p => p.Category)
-                .Include(p => p.Comments)
-                .Include(p => p.Ratings)
-                .Include(p => p.Likes)
                 .OrderByDescending(p => p.CreateDate)
+                .Select(p => new Post
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content.Length > 150 ? p.Content.Substring(0, 150) + "..." : p.Content,
+                    CreateDate = p.CreateDate,
+                    LikeCount = p.LikeCount,
+                    AverageRate = p.AverageRate,
+                    RateCount = p.RateCount,
+                    Status = p.Status,
+                    UserId = p.UserId,
+                    CategoryId = p.CategoryId,
+                    User = new User { Id = p.User.Id, Name = p.User.Name },
+                    Category = new Category { Id = p.Category.Id, Name = p.Category.Name }
+                })
                 .ToListAsync();
         }
 
@@ -183,10 +215,22 @@ namespace BlogApp.Repositories.Implementation
                 .Where(p => p.Status == PostStatus.Pending)
                 .Include(p => p.User)
                 .Include(p => p.Category)
-                .Include(p => p.Comments)
-                .Include(p => p.Ratings)
-                .Include(p => p.Likes)
                 .OrderByDescending(p => p.CreateDate)
+                .Select(p => new Post
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content.Length > 150 ? p.Content.Substring(0, 150) + "..." : p.Content,
+                    CreateDate = p.CreateDate,
+                    LikeCount = p.LikeCount,
+                    AverageRate = p.AverageRate,
+                    RateCount = p.RateCount,
+                    Status = p.Status,
+                    UserId = p.UserId,
+                    CategoryId = p.CategoryId,
+                    User = new User { Id = p.User.Id, Name = p.User.Name },
+                    Category = new Category { Id = p.Category.Id, Name = p.Category.Name }
+                })
                 .ToListAsync();
         }
 
@@ -243,6 +287,25 @@ namespace BlogApp.Repositories.Implementation
         }
 
 
+        public async Task<int> GetPendingPostsCount()
+        {
+            return await _context.Posts
+                .Where(p => p.Status == PostStatus.Pending)
+                .CountAsync();
+        }
+
+        public async Task<int> GetTotalPostsCount()
+        {
+            return await _context.Posts.CountAsync();
+        }
+
+        public async Task<int> GetApprovedPostsCount()
+        {
+            return await _context.Posts
+                .Where(p => p.Status == PostStatus.Approved)
+                .CountAsync();
+        }
+
         public async Task<Comment?> GetCommentById(int id)
         {
             return await _context.Comments
@@ -253,12 +316,12 @@ namespace BlogApp.Repositories.Implementation
         public async Task UpdateComment(Comment comment)
         {
             _context.Comments.Update(comment);
-            //await _context.SaveChangesAsync();
+
         }
         public async Task DeleteComment(Comment comment)
         {
             _context.Comments.Remove(comment);
-            //await _context.SaveChangesAsync();
+
         }
     }
 }

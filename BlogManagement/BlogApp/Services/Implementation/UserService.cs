@@ -38,5 +38,10 @@ namespace BlogApp.Services.Implementation
             await _unitOfWork.Save();
             return true;
         }
+
+        public async Task<int> GetTotalUsersCount()
+        {
+            return await _unitOfWork.UserRepository.GetTotalUsersCount();
+        }
     }
 }

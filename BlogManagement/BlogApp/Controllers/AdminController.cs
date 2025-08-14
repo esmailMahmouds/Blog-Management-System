@@ -1,7 +1,6 @@
-using BlogApp.Enums;
+using BlogApp.Filters;
 using BlogApp.Models.Dtos;
 using BlogApp.Services.Interfaces;
-using BlogApp.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.Controllers
@@ -24,15 +23,15 @@ namespace BlogApp.Controllers
         {
             try
             {
-                // Get dashboard statistics
-                var pendingPosts = await _postService.GetPendingPosts();
-                var allPosts = await _postService.GetAllPostsForAdmin();
-                var allUsers = await _userService.GetAllUsers();
+                var pendingPostsCount = await _postService.GetPendingPostsCount();
+                var totalPostsCount = await _postService.GetTotalPostsCount();
+                var totalUsersCount = await _userService.GetTotalUsersCount();
+                var approvedPostsCount = await _postService.GetApprovedPostsCount();
 
-                ViewBag.PendingPostsCount = pendingPosts.Count();
-                ViewBag.TotalPostsCount = allPosts.Count();
-                ViewBag.TotalUsersCount = allUsers.Count();
-                ViewBag.ApprovedPostsCount = allPosts.Count(p => p.Status == PostStatus.Approved);
+                ViewBag.PendingPostsCount = pendingPostsCount;
+                ViewBag.TotalPostsCount = totalPostsCount;
+                ViewBag.TotalUsersCount = totalUsersCount;
+                ViewBag.ApprovedPostsCount = approvedPostsCount;
 
                 return View();
             }

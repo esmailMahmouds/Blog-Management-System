@@ -10,5 +10,7 @@ namespace BlogApp.Services.Interfaces
         //admin specific methods
         Task<IEnumerable<User>> GetAllUsers();
         Task<bool> DeleteUser(int userId);
+
+        Task<int> GetTotalUsersCount();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using BlogApp.Models.DomainClasses;
-using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Repositories.Interfaces
 {
@@ -21,11 +20,13 @@ namespace BlogApp.Repositories.Interfaces
         Task<bool> RejectPost(int postId);
         Task<bool> AdminDeletePost(int postId);
 
+
+        Task<int> GetPendingPostsCount();
+        Task<int> GetTotalPostsCount();
+        Task<int> GetApprovedPostsCount();
+
         Task<Comment> GetCommentById(int id);
         Task UpdateComment(Comment comment);
         Task DeleteComment(Comment comment);
-
-
-
     }
 }

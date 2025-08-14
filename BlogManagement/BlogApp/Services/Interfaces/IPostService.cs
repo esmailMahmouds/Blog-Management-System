@@ -22,6 +22,11 @@ namespace BlogApp.Services.Interfaces
         Task<bool> RejectPost(int postId);
         Task<bool> AdminDeletePost(int postId);
 
+
+        Task<int> GetPendingPostsCount();
+        Task<int> GetTotalPostsCount();
+        Task<int> GetApprovedPostsCount();
+
         Task<bool> EditComment(int commentId, string newContent, int userId, bool isAdmin);
         Task<bool> DeleteComment(int commentId, int userId, bool isAdmin);
 

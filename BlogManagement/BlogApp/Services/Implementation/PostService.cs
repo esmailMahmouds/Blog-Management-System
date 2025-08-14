@@ -187,5 +187,19 @@ namespace BlogApp.Services.Implementation
             await _unitOfWork.Save();
             return true;
         }
+        public async Task<int> GetPendingPostsCount()
+        {
+            return await _unitOfWork.PostRepository.GetPendingPostsCount();
+        }
+
+        public async Task<int> GetTotalPostsCount()
+        {
+            return await _unitOfWork.PostRepository.GetTotalPostsCount();
+        }
+
+        public async Task<int> GetApprovedPostsCount()
+        {
+            return await _unitOfWork.PostRepository.GetApprovedPostsCount();
+        }
     }
 }
