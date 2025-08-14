@@ -110,6 +110,59 @@ namespace BlogApp.Repositories.Implementation
 
             return true;
         }
+
+
+        public async Task<Post> CreatePostAsync(Post post)
+        {
+            await _context.Posts.AddAsync(post);
+            return post;
+        }
+
+        public async Task<bool> UpdatePostAsync(Post post)
+        {
+            var existingPost = await _context.Posts.FirstOrDefaultAsync(p => p.Id == post.Id);
+            if (existingPost == null)
+                return false;
+
+            existingPost.Title = post.Title;
+            existingPost.Content = post.Content;
+            existingPost.CategoryId = post.CategoryId;
+            existingPost.Status = PostStatus.Pending;
+
+            _context.Posts.Update(existingPost);
+            return true;
+        }
+
+        public async Task<bool> DeletePostAsync(int postId)
+        {
+            var post = await _context.Posts
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .Include(p => p.Ratings)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return false;
+
+            if (post.Comments?.Any() == true)
+            {
+                _context.Comments.RemoveRange(post.Comments);
+            }
+
+            if (post.Likes?.Any() == true)
+            {
+                _context.Likes.RemoveRange(post.Likes);
+            }
+
+            if (post.Ratings?.Any() == true)
+            {
+                _context.Ratings.RemoveRange(post.Ratings);
+            }
+
+            _context.Posts.Remove(post);
+            return true;
+        }
+
         public async Task<Comment?> GetCommentById(int id)
         {
             return await _context.Comments
@@ -127,6 +180,5 @@ namespace BlogApp.Repositories.Implementation
             _context.Comments.Remove(comment);
             //await _context.SaveChangesAsync();
         }
-
     }
 }

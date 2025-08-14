@@ -1,10 +1,12 @@
-﻿using BlogApp.Models.DomainClasses;
+﻿using BlogApp.Enums;
+using BlogApp.Models.DomainClasses;
+using BlogApp.Models.Dtos;
 using BlogApp.Services.Interfaces;
 using BlogApp.UnitOfWork.Interfaces;
 
 namespace BlogApp.Services.Implementation
 {
-    public class PostService : IPostService 
+    public class PostService : IPostService
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -76,5 +78,72 @@ namespace BlogApp.Services.Implementation
             return true;
         }
 
+        public async Task CreatePost(CreatePostDto createPostDto, int userId)
+        {
+            var post = new Post
+            {
+                Title = createPostDto.Title,
+                Content = createPostDto.Content,
+                CategoryId = createPostDto.CategoryId,
+                UserId = userId,
+                Status = PostStatus.Pending,
+                LikeCount = 0,
+                AverageRate = 0,
+                RateCount = 0,
+                CreateDate = DateTime.Now
+            };
+
+            await _unitOfWork.PostRepository.CreatePostAsync(post);
+            await _unitOfWork.Save();
+        }
+
+        public async Task<IEnumerable<Category>> GetAllCategories()
+        {
+            return await _unitOfWork.CategoryRepository.GetAllCategories();
+        }
+
+        public async Task<bool> UpdatePost(EditPostDto editPostDto, int userId)
+        {
+            // Get the existing post to verify ownership
+            var existingPost = await _unitOfWork.PostRepository.GetPostById(editPostDto.Id);
+            if (existingPost == null)
+                return false;
+
+            // Check if the user is the owner of the post
+            if (existingPost.UserId != userId)
+                return false;
+
+            var post = new Post
+            {
+                Id = editPostDto.Id,
+                Title = editPostDto.Title,
+                Content = editPostDto.Content,
+                CategoryId = editPostDto.CategoryId
+            };
+
+            var updated = await _unitOfWork.PostRepository.UpdatePostAsync(post);
+            if (!updated)
+                return false;
+
+            await _unitOfWork.Save();
+            return true;
+        }
+
+        public async Task<bool> DeletePost(int postId, int userId)
+        {
+            var existingPost = await _unitOfWork.PostRepository.GetPostById(postId);
+            if (existingPost == null)
+                return false;
+
+            if (existingPost.UserId != userId)
+                return false;
+
+            var deleted = await _unitOfWork.PostRepository.DeletePostAsync(postId);
+            if (!deleted)
+                return false;
+
+            await _unitOfWork.Save();
+            return true;
+        }
     }
 }
