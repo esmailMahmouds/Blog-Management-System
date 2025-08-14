@@ -8,15 +8,44 @@ namespace BlogApp.Controllers
     public class HomePageController : Controller
     {
         private readonly IPostService _postService;
+        private readonly IJwtService _jwtService;
 
-        public HomePageController(IPostService postService)
+        public HomePageController(IPostService postService, IJwtService jwtService)
         {
             _postService = postService;
+            _jwtService = jwtService;
         }
 
-        public async Task<IActionResult> PostsDisplay()
+        public async Task<IActionResult> PostsDisplay(int? page)
         {
-            var posts = await _postService.GetAllPosts();
+
+            int pageSize = 15;
+            int currentPage = page ?? 1;
+            var (posts, totalCount) = await _postService.GetAllPosts(currentPage, pageSize);
+
+
+            Request.Cookies.TryGetValue("Jwt", out string? jwtToken);
+            if (!string.IsNullOrEmpty(jwtToken))
+            {
+                try
+                {
+                    var userId = _jwtService.GetUserIdFromToken(jwtToken);
+                    ViewBag.CurrentUserId = userId;
+                }
+                catch
+                {
+                    ViewBag.CurrentUserId = null;
+                }
+            }
+            else
+            {
+                ViewBag.CurrentUserId = null;
+            }
+
+            ViewBag.CurrentPage = currentPage;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+
             return View(posts);
         }
 
@@ -74,5 +103,37 @@ namespace BlogApp.Controllers
             await _postService.AddComment(postId, userId, content);
             return RedirectToAction("ViewPost", new { id = postId });
         }
+        [HttpPost]
+        public async Task<IActionResult> EditComment(int id, string content, int postId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var isAdmin = User.IsInRole("Admin");
+
+            var success = await _postService.EditComment(id, content, userId, isAdmin);
+
+            if (!success) return Forbid();
+
+            return RedirectToAction("ViewPost", new { id = postId });
+        }
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> DeleteComment(int id, int postId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int currentUserId))
+                return Unauthorized();
+
+            var isAdmin = User.IsInRole("Admin");
+
+            var success = await _postService.DeleteComment(id, currentUserId, isAdmin);
+
+            if (!success) return Forbid();
+
+            return RedirectToAction("ViewPost", new { id = postId });
+        }
+
     }
 }

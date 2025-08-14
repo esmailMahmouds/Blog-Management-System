@@ -4,6 +4,7 @@ using BlogApp.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250813192149_Seed_Categories")]
+    partial class Seed_Categories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,41 +139,6 @@ namespace BlogApp.Migrations
                         {
                             Id = 3,
                             Name = "KSA"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "China"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Italy"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "UAE"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "Spain"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "Canda"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "Tunisa"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "Algeria"
                         });
                 });
 

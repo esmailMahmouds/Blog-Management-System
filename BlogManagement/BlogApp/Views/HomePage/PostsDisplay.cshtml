@@ -1,21 +1,45 @@
 ﻿@model IEnumerable<BlogApp.Models.DomainClasses.Post>
 
 <div class="container my-4">
-    <h2 class="mb-4 text-primary">All Posts</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">All Posts</h2>
+        @if (Context.Request.Cookies.ContainsKey("Jwt") && !string.IsNullOrEmpty(Context.Request.Cookies["Jwt"]))
+        {
+            <a asp-controller="Posts" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Post
+            </a>
+        }
+    </div>
 
     <div class="row g-4">
         @foreach (var post in Model)
         {
             <div class="col-md-4">
-                <a asp-controller="HomePage" asp-action="ViewPost" asp-route-id="@post.Id" style="text-decoration:none; color:inherit;">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-body">
+                <div class="card shadow-sm border-0 h-100">
+                    @if (ViewBag.CurrentUserId != null && post.UserId == ViewBag.CurrentUserId)
+                    {
+                        <div class="card-header bg-transparent border-0 d-flex justify-content-end p-2">
+                            <div class="btn-group" role="group">
+                                <a asp-controller="Posts" asp-action="Edit" asp-route-id="@post.Id" 
+                                   class="btn btn-outline-primary btn-sm" title="Edit Post">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal@(post.Id)" title="Delete Post">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                    <a asp-controller="HomePage" asp-action="ViewPost" asp-route-id="@post.Id" style="text-decoration:none; color:inherit;">
+                        <div class="card-body @(ViewBag.CurrentUserId != null && post.UserId == ViewBag.CurrentUserId ? "pt-0" : "")">
                             <div class="d-flex justify-content-between align-items-start">
                                 <h5 class="card-title text-dark">@post.Title</h5>
                                 <span class="badge bg-light text-secondary border border-secondary">
                                     <i class="bi bi-tag-fill"></i> @post.Category.Name
                                 </span>
                             </div>
+                            <p class="text-muted mb-2"><small>by @post.User.Name</small></p>
                             <p class="card-text text-muted" style="display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden;">
                                 @post.Content
                             </p>
@@ -28,10 +52,77 @@
                                 ⭐ @post.AverageRate.ToString("0.0") (@post.RateCount votes)
                             </span>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
             </div>
         }
     </div>
+
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center shadow rounded-pill p-2 bg-light">
+
+            <!-- Previous Button -->
+            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link text-dark fw-bold fs-5"
+                   style="background: transparent; border: none;"
+                   asp-action="PostsDisplay" asp-route-page="@(ViewBag.CurrentPage - 1)">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+
+            <!-- Page Numbers -->
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item mx-1 @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link fw-bold fs-6 rounded-pill @(i == ViewBag.CurrentPage ? "bg-primary text-white shadow" : "bg-white text-dark")"
+                       style="transition: transform 0.2s, box-shadow 0.2s;"
+                       asp-action="PostsDisplay" asp-route-page="@i"
+                       onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.15)';"
+                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <!-- Next Button -->
+            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link text-dark fw-bold fs-5"
+                   style="background: transparent; border: none;"
+                   asp-action="PostsDisplay" asp-route-page="@(ViewBag.CurrentPage + 1)">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>
+
+<!-- Delete Confirmation Modals -->
+@foreach (var post in Model.Where(p => ViewBag.CurrentUserId != null && p.UserId == ViewBag.CurrentUserId))
+{
+    <div class="modal fade" id="deleteModal@(post.Id)" tabindex="-1" aria-labelledby="deleteModalLabel@(post.Id)" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel@(post.Id)">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this post?</p>
+                    <p><strong>Title:</strong> @post.Title</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This action cannot be undone. All comments, likes, and ratings associated with this post will also be deleted.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form asp-controller="Posts" asp-action="Delete" asp-route-id="@post.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">Delete Post</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 

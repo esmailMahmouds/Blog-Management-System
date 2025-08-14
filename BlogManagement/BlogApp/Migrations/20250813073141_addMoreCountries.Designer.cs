@@ -4,6 +4,7 @@ using BlogApp.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250813073141_addMoreCountries")]
+    partial class addMoreCountries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,38 +44,6 @@ namespace BlogApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Posts about technology and programming",
-                            Name = "Technology"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Posts about lifestyle and daily life",
-                            Name = "Lifestyle"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Posts about travel and adventures",
-                            Name = "Travel"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Posts about food and recipes",
-                            Name = "Food"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Posts about sports and fitness",
-                            Name = "Sports"
-                        });
                 });
 
             modelBuilder.Entity("BlogApp.Models.DomainClasses.Comment", b =>

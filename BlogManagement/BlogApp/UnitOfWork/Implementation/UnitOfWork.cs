@@ -13,6 +13,11 @@ namespace BlogApp.UnitOfWork.Implementation
         private IPostRepository _postRepository;
 
         private IUserRepository _userRepository;
+        
+        private ICategoryRepository _categoryRepository;
+
+        private ICountryRepository _countryRepository;
+
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -34,6 +39,23 @@ namespace BlogApp.UnitOfWork.Implementation
                 return _userRepository ??= new UserRepository(_context);
             }
         }
+
+
+        public ICategoryRepository CategoryRepository
+        {
+            get
+            {
+                return _categoryRepository ??= new CategoryRepository(_context);
+            }
+        }
+
+        public ICountryRepository CountryRepository
+        {
+            get
+            {
+                return _countryRepository ??= new CountryRepository(_context);
+            }
+        } 
 
         public async Task<int> Save()
         {
