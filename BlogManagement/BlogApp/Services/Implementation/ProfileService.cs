@@ -100,7 +100,60 @@ namespace BlogApp.Services.Implementation
             return await _unitOfWork.UserRepository.GetUserById(userId);
         }
 
-        public async Task<List<Country>> GetCountries()
+		public async Task<User?> GetCurrentUserWithFollow(int userId)
+		{
+			return await _unitOfWork.UserRepository.GetUserByIdWithFollow(userId);
+		}
+
+		public async Task<List<FollowListingDto>> GetCurrentUserFollowers(int userId)
+		{
+            IEnumerable<Follow> follows = await _unitOfWork.FollowRepository.GetFollowersByUserId(userId);
+            
+            List<FollowListingDto> followersListingDtos = [];
+            foreach (var follow in follows)
+            {
+                var user = await _unitOfWork.UserRepository.GetUserById(follow.FollowerUserId);
+                if (user != null)
+                {
+                    var followListingDto = new FollowListingDto
+                    {
+                        UserId = user.Id,
+                        Name = user.Name,
+                        ProfileImageBytes = user.ProfileImage
+                    };
+
+					followersListingDtos.Add(followListingDto);
+                }
+            }
+
+            return followersListingDtos;
+		}
+
+		public async Task<List<FollowListingDto>> GetCurrentUserFollowings(int userId)
+		{
+			IEnumerable<Follow> follows = await _unitOfWork.FollowRepository.GetFollowingsByUserId(userId);
+
+            List<FollowListingDto> followingsListingDtos = [];
+			foreach (var follow in follows)
+			{
+				var user = await _unitOfWork.UserRepository.GetUserById(follow.FollowingUserId);
+				if (user != null)
+				{
+					var followListingDto = new FollowListingDto
+					{
+						UserId = user.Id,
+						Name = user.Name,
+						ProfileImageBytes = user.ProfileImage
+					};
+
+					followingsListingDtos.Add(followListingDto);
+				}
+			}
+
+			return followingsListingDtos;
+		}
+
+		public async Task<List<Country>> GetCountries()
         {
             return (List<Country>) await _unitOfWork.CountryRepository.GetCountries();
         }

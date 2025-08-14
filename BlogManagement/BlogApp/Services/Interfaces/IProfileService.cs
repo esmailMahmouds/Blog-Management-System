@@ -9,6 +9,9 @@ namespace BlogApp.Services.Interfaces
         public Task<Result<int>> EditUserInfoAsync(UserInfoDto userInfoDto, int userId);
         public Task<Result<int>> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId);
         public Task<User?> GetCurrentUser(int userId);
-        public Task<List<Country>> GetCountries();
+        public Task<User?> GetCurrentUserWithFollow(int userId);
+        public Task<List<FollowListingDto>> GetCurrentUserFollowers(int userId);
+        public Task<List<FollowListingDto>> GetCurrentUserFollowings(int userId);
+		public Task<List<Country>> GetCountries();
     }
 }
