@@ -42,6 +42,7 @@ namespace BlogApp.Repositories.Implementation
                 .Include(u => u.Followers)
                 .Include(u => u.Followings)
                 .FirstOrDefaultAsync(u => u.Id == id);
+        }
 
         //admin specific methods
         public async Task<IEnumerable<User>> GetAllUsers()

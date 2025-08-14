@@ -13,7 +13,7 @@ namespace BlogApp.UnitOfWork.Implementation
         private IPostRepository _postRepository;
 
         private IUserRepository _userRepository;
-        
+
         private ICategoryRepository _categoryRepository;
 
         private ICountryRepository _countryRepository;
@@ -60,17 +60,14 @@ namespace BlogApp.UnitOfWork.Implementation
 
         }
 
-		public IFollowRepository FollowRepository
-		{
-			get
-			{
-				return _followRepository ??= new FollowRepository(_context);
-			}
-		}
-    
-		public async Task<int> Save()
+        public IFollowRepository FollowRepository
+        {
+            get
+            {
+                return _followRepository ??= new FollowRepository(_context);
+            }
+        }
 
-        } 
 
         public async Task<int> Save()
 
