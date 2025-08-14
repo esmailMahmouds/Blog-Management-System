@@ -57,6 +57,43 @@
             </div>
         }
     </div>
+
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center shadow rounded-pill p-2 bg-light">
+
+            <!-- Previous Button -->
+            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link text-dark fw-bold fs-5"
+                   style="background: transparent; border: none;"
+                   asp-action="PostsDisplay" asp-route-page="@(ViewBag.CurrentPage - 1)">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+
+            <!-- Page Numbers -->
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item mx-1 @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link fw-bold fs-6 rounded-pill @(i == ViewBag.CurrentPage ? "bg-primary text-white shadow" : "bg-white text-dark")"
+                       style="transition: transform 0.2s, box-shadow 0.2s;"
+                       asp-action="PostsDisplay" asp-route-page="@i"
+                       onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.15)';"
+                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <!-- Next Button -->
+            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link text-dark fw-bold fs-5"
+                   style="background: transparent; border: none;"
+                   asp-action="PostsDisplay" asp-route-page="@(ViewBag.CurrentPage + 1)">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
 <!-- Delete Confirmation Modals -->
