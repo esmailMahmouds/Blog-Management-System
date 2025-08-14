@@ -12,6 +12,7 @@ namespace BlogApp.Repositories.Interfaces
         Task<Post> CreatePostAsync(Post post);
         Task<bool> UpdatePostAsync(Post post);
         Task<bool> DeletePostAsync(int postId);
+        Task<IEnumerable<Post>> GetPostsByUserId(int userId);
 
         //admin specific methods
         Task<IEnumerable<Post>> GetAllPostsIncludingPending();
@@ -25,7 +26,7 @@ namespace BlogApp.Repositories.Interfaces
         Task<int> GetTotalPostsCount();
         Task<int> GetApprovedPostsCount();
 
-        Task<Comment> GetCommentById(int id);
+        Task<Comment?> GetCommentById(int id);
         Task UpdateComment(Comment comment);
         Task DeleteComment(Comment comment);
     }

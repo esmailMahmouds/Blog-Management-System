@@ -102,6 +102,10 @@ namespace BlogApp.Services.Implementation
             return await _unitOfWork.CategoryRepository.GetAllCategories();
         }
 
+        public async Task<IEnumerable<Post>> GetPostsByUserId(int userId)
+        {
+            return await _unitOfWork.PostRepository.GetPostsByUserId(userId);
+        }
 
         public async Task<bool> UpdatePost(EditPostDto editPostDto, int userId)
         {

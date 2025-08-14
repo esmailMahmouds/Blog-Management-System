@@ -15,28 +15,33 @@ namespace BlogApp.Controllers
         private readonly ILogger<ProfileController> _logger;
         private readonly IProfileService _profileService;
         private readonly IJwtService _jwtService;
+        private readonly IPostService _postService;
 
-        public ProfileController(ILogger<ProfileController> logger,IProfileService profileService, IJwtService jwtService)
+        public ProfileController(ILogger<ProfileController> logger, IProfileService profileService, IJwtService jwtService, IPostService postService)
         {
             _logger = logger;
             _profileService = profileService;
             _jwtService = jwtService;
+            _postService = postService;
         }
 
         public async Task<IActionResult> Index()
         {
             User? currentUser = null;
+            IEnumerable<Post> userPosts = new List<Post>();
 
             if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
             {
                 var userId = _jwtService.GetUserIdFromToken(jwtToken);
                 currentUser = await _profileService.GetCurrentUser(userId);
+                userPosts = await _postService.GetPostsByUserId(userId);
             }
 
             if (currentUser != null)
             {
                 List<Country> countries = await _profileService.GetCountries();
                 ViewBag.countries = new SelectList(countries, "Id", "Name");
+                ViewBag.UserPosts = userPosts;
 
                 return View(currentUser);
             }
@@ -119,5 +124,18 @@ namespace BlogApp.Controllers
 
 			return View(followingsListingDto);
 		}
-	}
+
+        public async Task<IActionResult> MyPosts()
+        {
+            IEnumerable<Post> userPosts = new List<Post>();
+
+            if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
+            {
+                var userId = _jwtService.GetUserIdFromToken(jwtToken);
+                userPosts = await _postService.GetPostsByUserId(userId);
+            }
+
+            return View(userPosts);
+        }
+    }
 }

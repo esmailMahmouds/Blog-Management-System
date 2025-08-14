@@ -19,16 +19,76 @@
 	<ul class="nav nav-underline">
 	  <li class="nav-item">
 		<a class="nav-link " aria-current="page" asp-controller="Profile" asp-action="FollowersPage">
-			My Followers
+			<i class="fas fa-users"></i> My Followers
 		</a>
 	  </li>
 	  <li class="nav-item">
 		<a class="nav-link " aria-current="page" asp-controller="Profile" asp-action="FollowingsPage">
-			My Followings
+			<i class="fas fa-user-friends"></i> My Followings
+		</a>
+	  </li>
+	  <li class="nav-item">
+		<a class="nav-link " aria-current="page" asp-controller="Profile" asp-action="MyPosts">
+			<i class="fas fa-newspaper"></i> My Posts
 		</a>
 	  </li>
 	</ul>
 </div>
+
+<!-- Posts Summary Section -->
+@if (ViewBag.UserPosts != null)
+{
+    var posts = (IEnumerable<Post>)ViewBag.UserPosts;
+    var pendingCount = posts.Count(p => p.Status == BlogApp.Enums.PostStatus.Pending);
+    var approvedCount = posts.Count(p => p.Status == BlogApp.Enums.PostStatus.Approved);
+    var rejectedCount = posts.Count(p => p.Status == BlogApp.Enums.PostStatus.Rejected);
+    var totalPosts = posts.Count();
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Posts Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="border-end">
+                                <h3 class="text-primary">@totalPosts</h3>
+                                <small class="text-muted">Total Posts</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border-end">
+                                <h3 class="text-success">@approvedCount</h3>
+                                <small class="text-muted">Approved</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border-end">
+                                <h3 class="text-warning">@pendingCount</h3>
+                                <small class="text-muted">Pending</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-danger">@rejectedCount</h3>
+                            <small class="text-muted">Rejected</small>
+                        </div>
+                    </div>
+                    @if (totalPosts > 0)
+                    {
+                        <div class="mt-3">
+                            <a asp-action="MyPosts" class="btn btn-outline-primary">
+                                <i class="fas fa-eye"></i> View All My Posts
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <div class="d-flex flex-row justify-content-center">
 	<partial name="_UserInfo.cshtml" model="@userInfoDto"/>
 	<partial name="_ResetPassword.cshtml" model="@changePasswordDto"/>

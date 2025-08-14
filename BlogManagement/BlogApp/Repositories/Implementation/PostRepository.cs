@@ -182,6 +182,30 @@ namespace BlogApp.Repositories.Implementation
             return true;
         }
 
+        public async Task<IEnumerable<Post>> GetPostsByUserId(int userId)
+        {
+            return await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.UserId == userId)
+                .Include(p => p.Category)
+                .OrderByDescending(p => p.CreateDate)
+                .Select(p => new Post
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content.Length > 150 ? p.Content.Substring(0, 150) + "..." : p.Content,
+                    CreateDate = p.CreateDate,
+                    LikeCount = p.LikeCount,
+                    AverageRate = p.AverageRate,
+                    RateCount = p.RateCount,
+                    Status = p.Status,
+                    UserId = p.UserId,
+                    CategoryId = p.CategoryId,
+                    Category = new Category { Id = p.Category.Id, Name = p.Category.Name }
+                })
+                .ToListAsync();
+        }
+
         //admin specific methods - optimized for performance
         public async Task<IEnumerable<Post>> GetAllPostsIncludingPending()
         {

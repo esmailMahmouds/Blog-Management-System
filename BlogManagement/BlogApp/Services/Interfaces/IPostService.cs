@@ -14,6 +14,7 @@ namespace BlogApp.Services.Interfaces
         Task<bool> UpdatePost(EditPostDto editPostDto, int userId);
         Task<bool> DeletePost(int postId, int userId);
         Task<IEnumerable<Category>> GetAllCategories();
+        Task<IEnumerable<Post>> GetPostsByUserId(int userId);
 
         //admin specific methods
         Task<IEnumerable<Post>> GetAllPostsForAdmin();
