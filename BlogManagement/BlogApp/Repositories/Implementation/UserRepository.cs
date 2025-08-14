@@ -35,6 +35,14 @@ namespace BlogApp.Repositories.Implementation
             return entityEntry.Entity;
         }
 
+
+        public async Task<User?> GetUserByIdWithFollow(int id)
+        {
+            return await _context.Users.AsNoTracking()
+                .Include(u => u.Followers)
+                .Include(u => u.Followings)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
         //admin specific methods
         public async Task<IEnumerable<User>> GetAllUsers()
         {
@@ -73,6 +81,7 @@ namespace BlogApp.Repositories.Implementation
         public async Task<int> GetTotalUsersCount()
         {
             return await _context.Users.CountAsync();
+
         }
     }
 }

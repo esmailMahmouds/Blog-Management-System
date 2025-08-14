@@ -22,15 +22,15 @@ namespace BlogApp.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Follow>()
-            .HasOne(f => f.FollowerUser)
+            .HasOne(f => f.FollowingUser)
             .WithMany(u => u.Followers)
-            .HasForeignKey(f => f.FollowerUserId)
+            .HasForeignKey(f => f.FollowingUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Follow>()
-                .HasOne(f => f.FollowingUser)
+                .HasOne(f => f.FollowerUser)
                 .WithMany(u => u.Followings)
-                .HasForeignKey(f => f.FollowingUserId)
+                .HasForeignKey(f => f.FollowerUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             foreach (var relationship in modelBuilder.Model.GetEntityTypes()

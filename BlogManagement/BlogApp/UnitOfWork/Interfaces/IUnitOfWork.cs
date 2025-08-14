@@ -11,6 +11,7 @@ namespace BlogApp.UnitOfWork.Interfaces
         public ICategoryRepository CategoryRepository { get; }
 
         public ICountryRepository CountryRepository { get; }
+        public IFollowRepository FollowRepository { get; }
 
 
         Task<int> Save();

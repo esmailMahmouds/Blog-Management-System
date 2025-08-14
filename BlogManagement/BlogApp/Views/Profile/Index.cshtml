@@ -14,11 +14,25 @@
 }
 
 
-<div class="d-flex col justify-content-center">
+<div class="d-flex flex-column align-content-center">
+<div>
+	<ul class="nav nav-underline">
+	  <li class="nav-item">
+		<a class="nav-link " aria-current="page" asp-controller="Profile" asp-action="FollowersPage">
+			My Followers
+		</a>
+	  </li>
+	  <li class="nav-item">
+		<a class="nav-link " aria-current="page" asp-controller="Profile" asp-action="FollowingsPage">
+			My Followings
+		</a>
+	  </li>
+	</ul>
+</div>
+<div class="d-flex flex-row justify-content-center">
 	<partial name="_UserInfo.cshtml" model="@userInfoDto"/>
 	<partial name="_ResetPassword.cshtml" model="@changePasswordDto"/>
-	<h1>My Followers</h1>
-
+</div>
 </div>
 
 

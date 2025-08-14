@@ -1,0 +1,46 @@
+﻿@model List<FollowListingDto>
+
+<link rel="stylesheet" href="~/css/followPages.css" asp-append-version="true" />
+
+<div class="follow-page-container">
+    @if (Model == null || Model.Count == 0)
+    {
+            <div class="text-center">
+                <h1 class="text-danger">No Followings</h1>
+            </div>
+    }
+    else
+    {
+            <div class="follow-header">
+                <h1 class="text-primary">My Followings</h1>
+            </div>
+
+            <div class="follow-list-container">
+            @foreach (var following in Model)
+            {
+                        <div class="follow-item following-item">
+                            <div class="follow-item-content">
+                                <div class="profile-image-wrapper">
+                                    <img loading="lazy"
+                                         src="@(following.ProfileImageBase64 != null ?
+                                    $"data:image/jpeg;base64,{following.ProfileImageBase64}" :
+                                    "/images/Portrait_Placeholder.png")"
+                                         alt="Profile Image" 
+                                         class="follower-profile-image" />
+                                </div>
+                                <div class="follower-info">
+                                    <a href="@Url.Action("FollowingsPage", "Profile")" class="follower-name">
+                                @following.Name
+                                    </a>
+                                </div>
+                            </div>
+                            @* <div class="unfollow-button-wrapper">
+                                <button type="button" class="btn btn-outline-danger btn-sm unfollow-btn">
+                                    Unfollow
+                                </button>
+                            </div> *@
+                        </div>
+            }
+            </div>
+    }
+</div>

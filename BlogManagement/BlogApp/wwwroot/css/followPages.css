@@ -1,0 +1,124 @@
+﻿.follow-page-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.follow-header {
+    text-align: center;
+    margin-left: -50px;
+    margin-bottom: 30px;
+}
+
+    .follow-header h1 {
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+.follow-list-container {
+    width: 100%;
+}
+
+.follow-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+    .follow-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+.follow-item-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.profile-image-wrapper {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 15px;
+    border: 2px solid #dee2e6;
+    flex-shrink: 0;
+}
+
+.follower-profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.follower-info {
+    flex: 1;
+}
+
+.follower-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+    .follower-name:hover {
+        color: #007bff;
+        text-decoration: underline;
+    }
+
+.unfollow-button-wrapper {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.following-item:hover .unfollow-button-wrapper {
+    opacity: 1;
+}
+
+.unfollow-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+    .unfollow-btn:hover {
+        background-color: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+
+@media (max-width: 576px) {
+    .follow-page-container {
+        padding: 10px;
+    }
+
+    .follow-item {
+        padding: 12px 15px;
+    }
+
+    .profile-image-wrapper {
+        width: 40px;
+        height: 40px;
+        margin-right: 12px;
+    }
+
+    .follower-name {
+        font-size: 14px;
+    }
+
+    .follow-header {
+        margin-left: -20px;
+    }
+}

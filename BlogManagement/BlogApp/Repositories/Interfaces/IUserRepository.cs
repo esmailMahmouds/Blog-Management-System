@@ -9,11 +9,12 @@ namespace BlogApp.Repositories.Interfaces
         public Task<User?> GetUserByEmail(string email);
         public User? UpdateUser(User user);
 
+        public Task<User?> GetUserByIdWithFollow(int id);
+
         //admin specific methods
         public Task<IEnumerable<User>> GetAllUsers();
         public Task<bool> DeleteUser(int userId);
-
-
         public Task<int> GetTotalUsersCount();
     }
+
 }

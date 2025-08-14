@@ -94,5 +94,30 @@ namespace BlogApp.Controllers
 
 			return RedirectToAction("Index");
 		}
+
+        public async Task<IActionResult> FollowersPageAsync()
+        {
+            List<FollowListingDto> followersListingDto = [];
+
+			if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
+			{
+				var userId = _jwtService.GetUserIdFromToken(jwtToken);
+				followersListingDto = await _profileService.GetCurrentUserFollowers(userId);
+			}
+
+			return View(followersListingDto);
+        }
+		public async Task<IActionResult> FollowingsPageAsync()
+		{
+			List<FollowListingDto> followingsListingDto = [];
+
+			if (Request.Cookies.TryGetValue("Jwt", out string? jwtToken) && !string.IsNullOrEmpty(jwtToken))
+			{
+				var userId = _jwtService.GetUserIdFromToken(jwtToken);
+				followingsListingDto = await _profileService.GetCurrentUserFollowings(userId);
+			}
+
+			return View(followingsListingDto);
+		}
 	}
 }
