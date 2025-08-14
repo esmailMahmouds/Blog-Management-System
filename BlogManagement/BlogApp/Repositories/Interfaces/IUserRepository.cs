@@ -7,5 +7,10 @@ namespace BlogApp.Repositories.Interfaces
         public Task AddUser(User user);
         public Task<User?> GetUserById(int id);
         public Task<User?> GetUserByEmail(string email);
+        public User? UpdateUser(User user);
+
+        //admin specific methods
+        public Task<IEnumerable<User>> GetAllUsers();
+        public Task<bool> DeleteUser(int userId);
     }
 }

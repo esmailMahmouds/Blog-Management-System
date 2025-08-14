@@ -105,5 +105,136 @@ namespace BlogApp.Repositories.Implementation
 
             return true;
         }
+
+        public async Task<Post> CreatePostAsync(Post post)
+        {
+            await _context.Posts.AddAsync(post);
+            return post;
+        }
+
+        public async Task<bool> UpdatePostAsync(Post post)
+        {
+            var existingPost = await _context.Posts.FirstOrDefaultAsync(p => p.Id == post.Id);
+            if (existingPost == null)
+                return false;
+
+            existingPost.Title = post.Title;
+            existingPost.Content = post.Content;
+            existingPost.CategoryId = post.CategoryId;
+            existingPost.Status = PostStatus.Pending;
+
+            _context.Posts.Update(existingPost);
+            return true;
+        }
+
+        public async Task<bool> DeletePostAsync(int postId)
+        {
+            var post = await _context.Posts
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .Include(p => p.Ratings)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return false;
+
+            if (post.Comments?.Any() == true)
+            {
+                _context.Comments.RemoveRange(post.Comments);
+            }
+
+            if (post.Likes?.Any() == true)
+            {
+                _context.Likes.RemoveRange(post.Likes);
+            }
+
+            if (post.Ratings?.Any() == true)
+            {
+                _context.Ratings.RemoveRange(post.Ratings);
+            }
+
+            _context.Posts.Remove(post);
+            return true;
+        }
+
+        //admin specific methods
+        public async Task<IEnumerable<Post>> GetAllPostsIncludingPending()
+        {
+            return await _context.Posts
+                .AsNoTracking()
+                .Include(p => p.User)
+                .Include(p => p.Category)
+                .Include(p => p.Comments)
+                .Include(p => p.Ratings)
+                .Include(p => p.Likes)
+                .OrderByDescending(p => p.CreateDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Post>> GetPendingPosts()
+        {
+            return await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.Status == PostStatus.Pending)
+                .Include(p => p.User)
+                .Include(p => p.Category)
+                .Include(p => p.Comments)
+                .Include(p => p.Ratings)
+                .Include(p => p.Likes)
+                .OrderByDescending(p => p.CreateDate)
+                .ToListAsync();
+        }
+
+        public async Task<bool> ApprovePost(int postId)
+        {
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if (post == null)
+                return false;
+
+            post.Status = PostStatus.Approved;
+            _context.Posts.Update(post);
+            return true;
+        }
+
+        public async Task<bool> RejectPost(int postId)
+        {
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if (post == null)
+                return false;
+
+            post.Status = PostStatus.Rejected;
+            _context.Posts.Update(post);
+            return true;
+        }
+
+        public async Task<bool> AdminDeletePost(int postId)
+        {
+            var post = await _context.Posts
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .Include(p => p.Ratings)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return false;
+
+            if (post.Comments?.Any() == true)
+            {
+                _context.Comments.RemoveRange(post.Comments);
+            }
+
+            if (post.Likes?.Any() == true)
+            {
+                _context.Likes.RemoveRange(post.Likes);
+            }
+
+            if (post.Ratings?.Any() == true)
+            {
+                _context.Ratings.RemoveRange(post.Ratings);
+            }
+
+            _context.Posts.Remove(post);
+            return true;
+        }
     }
 }

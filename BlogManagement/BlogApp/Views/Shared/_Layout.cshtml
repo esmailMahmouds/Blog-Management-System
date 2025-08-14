@@ -7,12 +7,16 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BlogApp.styles.css" asp-append-version="true" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-primary border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BlogApp</a>
+                <a class="navbar-brand text-white" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-blog"></i> BlogApp
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -20,35 +24,74 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home"></i> Home
+                            </a>
                         </li>
                         @if (Context.Request.Cookies.ContainsKey("Jwt") && !string.IsNullOrEmpty(Context.Request.Cookies["Jwt"]))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="HomePage" asp-action="PostsDisplay">Posts</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="HomePage" asp-action="PostsDisplay">
+                                    <i class="fas fa-newspaper"></i> Posts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Posts" asp-action="Create">
+                                    <i class="fas fa-plus"></i> Create Post
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown" id="adminMenu" style="display: none;">
+                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-shield"></i> Admin
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">
+                                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="PendingPosts">
+                                        <i class="fas fa-clock text-warning"></i> Pending Posts
+                                    </a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="AllPosts">
+                                        <i class="fas fa-newspaper text-primary"></i> All Posts
+                                    </a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="ManageUsers">
+                                        <i class="fas fa-users text-info"></i> Manage Users
+                                    </a></li>
+                                </ul>
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">
+                                <i class="fas fa-shield-alt"></i> Privacy
+                            </a>
                         </li>
                     </ul>
                     <ul class="navbar-nav">
                         @if (Context.Request.Cookies.ContainsKey("Jwt") && !string.IsNullOrEmpty(Context.Request.Cookies["Jwt"]))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index">Profile</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="Profile" asp-action="Index">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="Logout">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="SignIn">Sign In</a>
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="SignIn">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="SignUp">Sign Up</a>
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="SignUp">
+                                    <i class="fas fa-user-plus"></i> Sign Up
+                                </a>
                             </li>
                         }
                     </ul>
@@ -61,14 +104,14 @@
             @if (TempData["SuccessMessage"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    @TempData["SuccessMessage"]
+                    <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
             @if (TempData["ErrorMessage"] != null)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    @TempData["ErrorMessage"]
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
@@ -84,6 +127,39 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <!-- Check admin role and show/hide admin menu -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get JWT token from cookie
+            const jwtToken = getCookie('Jwt');
+            if (jwtToken) {
+                try {
+                    // Decode JWT payload (simple base64 decode)
+                    const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+                    const userRole = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+                    
+                    // Show admin menu if user is admin
+                    if (userRole === 'Admin') {
+                        const adminMenu = document.getElementById('adminMenu');
+                        if (adminMenu) {
+                            adminMenu.style.display = 'block';
+                        }
+                    }
+                } catch (error) {
+                    console.log('Error decoding JWT token:', error);
+                }
+            }
+        });
+
+        // Helper function to get cookie value
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
